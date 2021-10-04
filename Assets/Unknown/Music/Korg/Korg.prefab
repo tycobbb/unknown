@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3381909623042200350
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3381909623042200348}
+  - component: {fileID: 3381909623042200351}
+  m_Layer: 0
+  m_Name: Korg
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3381909623042200348
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3381909623042200350}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3381909623042200351
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3381909623042200350}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ead7adb9bee04b28b51bdda8ff1fc118, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mA3: {fileID: 8300000, guid: 2f27dc624325b493d9fb58428a11cd92, type: 3}
+  mAs3: {fileID: 8300000, guid: 31910496ecb0a489fbf03dbed1c59c43, type: 3}
+  mB3: {fileID: 8300000, guid: ca191431bb3934b3185c277af5a785f2, type: 3}
+  mC3: {fileID: 8300000, guid: bb65c75150c7e4b7d8f0c1192c52ab55, type: 3}
+  mCs3: {fileID: 8300000, guid: aeaba65761cbf4df1bef603c0627e882, type: 3}
+  mD3: {fileID: 8300000, guid: b0d01cd1a5b884923947f24081a376ae, type: 3}
+  mDs3: {fileID: 8300000, guid: 8f66aa37a34e240c39f0f68fe451e4bb, type: 3}
+  mE3: {fileID: 8300000, guid: e5ebecb278fa34c2eba4597285d9633a, type: 3}
+  mF3: {fileID: 8300000, guid: b370caabd6f15488b8b9510e87e0e5f1, type: 3}
+  mFs3: {fileID: 8300000, guid: 6d1bfea7ae1014539b99623d5bb64905, type: 3}
+  mG3: {fileID: 8300000, guid: c603a258aefb2434a8a90abdb8eb81af, type: 3}
+  mGs3: {fileID: 8300000, guid: 0146718c8f3234669ab8327aca23d420, type: 3}
