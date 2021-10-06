@@ -1,9 +1,12 @@
 Shader "Custom/Outline" {
     Properties {
-        _Width ("Outline width", Range(0, 10)) = 10.0
-        _Hue ("Hue shift", Range(0.0, 1.0)) = 0.0
-        _Saturation ("Saturation shift", Range(0.0, 1.0)) = 0.0
-        _Value ("Value shift", Range(0.0, 1.0)) = 0.0
+        _Width ("Width", Range(0, 10)) = 10.0
+        _Hue ("Hue Shift", Range(0.0, 1.0)) = 0.0
+        _Saturation ("Saturation Shift", Range(0.0, 1.0)) = 0.0
+        _Value ("Value Shift", Range(0.0, 1.0)) = 0.0
+        _NoiseTex ("Noise Tex", 2D) = "white" {}
+        _NoiseFreq ("Noise Frequency", Float) = 10.0
+        _NoiseAmpl ("Noise Amplitude", Float) = 0.01
     }
 
     SubShader {
@@ -26,27 +29,27 @@ Shader "Custom/Outline" {
 
             // -- types --
             struct VertIn {
-                float4 vPos : POSITION;
-                float4 vColor : COLOR;
+                float4 pos : POSITION;
+                float4 color : COLOR;
             };
 
             struct VertOut {
-                float4 vPos : SV_POSITION;
-                float4 vColor : COLOR;
+                float4 pos : SV_POSITION;
+                float4 color : COLOR;
                 UNITY_FOG_COORDS(1)
             };
 
             // -- program --
             VertOut DrawVert(VertIn v) {
                 VertOut o;
-                o.vPos = UnityObjectToClipPos(v.vPos);
-                o.vColor = v.vColor;
-                UNITY_TRANSFER_FOG(o, o.vPos);
+                o.pos = UnityObjectToClipPos(v.pos);
+                o.color = v.color;
+                UNITY_TRANSFER_FOG(o, o.pos);
                 return o;
             }
 
             fixed4 DrawFrag(VertOut i) : SV_Target {
-                fixed4 c = i.vColor;
+                fixed4 c = i.color;
                 UNITY_APPLY_FOG(i.fogCoord, c);
                 return c;
             }
@@ -77,16 +80,26 @@ Shader "Custom/Outline" {
             /// the outline value shift
             float _Value;
 
+            /// the outline noise texture
+            sampler2D _NoiseTex;
+
+            /// the speed the outline wiggles
+            float _NoiseFreq;
+
+            /// the amount the outline wiggles
+            float _NoiseAmpl;
+
             // -- types --
             struct VertIn {
-                float4 vPos : POSITION;
-                float3 vNormal : NORMAL;
-                float4 vColor : COLOR;
+                float4 pos : POSITION;
+                float3 normal : NORMAL;
+                float4 color : COLOR;
             };
 
             struct VertOut {
-                float4 cPos : SV_POSITION;
-                float4 fColor : COLOR;
+                float4 pos : SV_POSITION;
+                float4 color : COLOR;
+                float2 uv : TEXCOORD0;
             };
 
             // -- helpers --
@@ -112,39 +125,54 @@ Shader "Custom/Outline" {
 
             // -- program --
             VertOut DrawVert(VertIn i) {
-                VertOut o;
-
                 // offset the outline from the edge of the model in clip space
-                o.cPos = UnityObjectToClipPos(i.vPos);
+                float4 cPos = UnityObjectToClipPos(i.pos);
 
                 // get clip space normal
-                float3 cNormal = mul((float3x3)UNITY_MATRIX_VP, mul((float3x3)UNITY_MATRIX_M, i.vNormal));
+                float3 cNormal = mul((float3x3)UNITY_MATRIX_VP, mul((float3x3)UNITY_MATRIX_M, i.normal));
 
                 // get offset of the outline
                 float2 offset = normalize(cNormal.xy); // along the normal
                 offset /= _ScreenParams.xy;            // in pixels
                 offset *= _Width;                      // by the outline width
                 offset *= 2.0;
-                offset *= o.cPos.w;                    // adjust for perspective
+                offset *= cPos.w;                      // adjust for perspective
 
                 // add the offset to the pos
-                o.cPos.xy += offset;
+                cPos.xy += offset;
 
                 // get the shifted color for this vert
-                float3 color = IntoHsv(i.vColor);
+                float3 color = IntoHsv(i.color);
                 color.x = frac(color.x + _Hue);
                 color.y = frac(color.y + _Saturation);
                 color.z = frac(color.z + _Value);
+                color = IntoRgb(color);
 
-                // set the fragment color
-                o.fColor = float4(IntoRgb(color), 0.0);
+                // build output
+                VertOut o;
+                o.pos = cPos;
+                o.uv = i.pos.xy;
+                o.color = float4(color, 0.0);
 
                 return o;
             }
 
             float4 DrawFrag(VertOut o) : SV_TARGET {
-                return o.fColor;
+                float2 uv;
+                uv.x = frac(o.uv.x + cos(_Time * _NoiseFreq) * 0.5 * _NoiseAmpl);
+                uv.y = frac(o.uv.y + sin(_Time * _NoiseFreq) * 0.5 * _NoiseAmpl);
+
+                if (tex2D(_NoiseTex, uv).r > 0.5) {
+                    discard;
+                }
+
+                return o.color;
             }
+
+            // float4 DrawFrag(VertOut o) : SV_TARGET {
+            //     return o.color;
+            // }
+
             ENDCG
         }
     }

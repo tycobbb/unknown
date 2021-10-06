@@ -51,6 +51,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _NoiseTex:
+        m_Texture: {fileID: 2800000, guid: 638a47e9074e24b1ea2e669cde5464b3, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -68,6 +72,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
+    - _Ampl: 0
     - _BlendOp: 0
     - _BumpScale: 1
     - _CameraFadingEnabled: 0
@@ -86,6 +91,7 @@ Material:
     - _EmissionEnabled: 0
     - _Exposure: 1
     - _FlipbookMode: 0
+    - _Freq: 0
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
@@ -93,6 +99,9 @@ Material:
     - _LightingEnabled: 0
     - _Metallic: 0
     - _Mode: 0
+    - _NoiseAmpl: 0.01
+    - _NoiseFreq: 10
+    - _NoiseSize: 0
     - _OcclusionStrength: 1
     - _OutlineWidth: 8
     - _OutlineWidth2: 10
@@ -107,7 +116,7 @@ Material:
     - _SrcBlend: 1
     - _UVSec: 0
     - _Value: 0.311
-    - _Width: 10
+    - _Width: 8.79
     - _WindQuality: 0
     - _ZWrite: 1
     m_Colors:
@@ -116,6 +125,7 @@ Material:
     - _ColorAddSubDiff: {r: 0, g: 0, b: 0, a: 0}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _HueVariation: {r: 1, g: 0.5, b: 0, a: 0.1}
+    - _NoiseSize: {r: 128, g: 128, b: 0, a: 1}
     - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
     - _OutlineWidth: {r: 0, g: 0, b: 0, a: 0}
     - _OutlineWidthScale: {r: 0.0062735258, g: 0.0059031877, b: 0, a: 0}
