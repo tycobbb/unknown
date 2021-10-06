@@ -116,7 +116,9 @@ Material:
     - _SrcBlend: 1
     - _UVSec: 0
     - _Value: 0.311
-    - _Width: 8.79
+    - _Width: 8
+    - _WidthAmpl: 2
+    - _WidthFreq: 2
     - _WindQuality: 0
     - _ZWrite: 1
     m_Colors:
