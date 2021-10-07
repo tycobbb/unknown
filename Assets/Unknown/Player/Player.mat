@@ -101,6 +101,7 @@ Material:
     - _Mode: 0
     - _NoiseAmpl: 0.01
     - _NoiseFreq: 10
+    - _NoiseMax: 0.6
     - _NoiseSize: 0
     - _OcclusionStrength: 1
     - _OutlineWidth: 8
