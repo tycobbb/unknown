@@ -7,11 +7,11 @@ public class Shape: MonoBehaviour {
 
         var p0 = Vector3.zero;
         p0.x = GetAnimValue(pct + 0.75f);
-        p0.y = GetAnimValue(pct + 0.75f);
+        p0.y = p0.x;
 
         var p1 = Vector3.zero;
         p1.x = GetAnimValue(pct + 0.50f);
-        p1.y = GetAnimValue(pct + 0.00f);
+        p1.y = GetAnimValue(pct);
 
         p0.x -= 0.5f;
         p1.x -= 0.5f;
