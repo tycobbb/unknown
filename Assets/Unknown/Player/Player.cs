@@ -1,5 +1,6 @@
 using UnityEngine;
 
+/// the player
 public class Player: MonoBehaviour {
     // -- tuning --
     [Header("config")]
