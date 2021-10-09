@@ -28,10 +28,19 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
             ""id"": ""10f92ff5-4d3b-4aa2-98eb-75874ab01d03"",
             ""actions"": [
                 {
-                    ""name"": ""Move"",
+                    ""name"": ""Left"",
                     ""type"": ""Value"",
                     ""id"": ""17139cd4-30a8-4cb7-849a-f460c80024aa"",
-                    ""expectedControlType"": ""Stick"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""Right"",
+                    ""type"": ""Value"",
+                    ""id"": ""82dc1676-bae9-4f5a-9ba7-1a1b581db4e6"",
+                    ""expectedControlType"": ""Vector2"",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
@@ -45,7 +54,18 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Gamepad"",
-                    ""action"": ""Move"",
+                    ""action"": ""Left"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""8a7e3d4c-1071-42b9-a58c-f0a0ca56d15b"",
+                    ""path"": ""<Gamepad>/rightStick"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""Right"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -117,7 +137,8 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
 }");
         // Player
         m_Player = asset.FindActionMap("Player", throwIfNotFound: true);
-        m_Player_Move = m_Player.FindAction("Move", throwIfNotFound: true);
+        m_Player_Left = m_Player.FindAction("Left", throwIfNotFound: true);
+        m_Player_Right = m_Player.FindAction("Right", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -177,12 +198,14 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
     // Player
     private readonly InputActionMap m_Player;
     private IPlayerActions m_PlayerActionsCallbackInterface;
-    private readonly InputAction m_Player_Move;
+    private readonly InputAction m_Player_Left;
+    private readonly InputAction m_Player_Right;
     public struct PlayerActions
     {
         private @PlayerInput m_Wrapper;
         public PlayerActions(@PlayerInput wrapper) { m_Wrapper = wrapper; }
-        public InputAction @Move => m_Wrapper.m_Player_Move;
+        public InputAction @Left => m_Wrapper.m_Player_Left;
+        public InputAction @Right => m_Wrapper.m_Player_Right;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -192,16 +215,22 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
         {
             if (m_Wrapper.m_PlayerActionsCallbackInterface != null)
             {
-                @Move.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnMove;
-                @Move.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnMove;
-                @Move.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnMove;
+                @Left.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnLeft;
+                @Left.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnLeft;
+                @Left.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnLeft;
+                @Right.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnRight;
+                @Right.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnRight;
+                @Right.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnRight;
             }
             m_Wrapper.m_PlayerActionsCallbackInterface = instance;
             if (instance != null)
             {
-                @Move.started += instance.OnMove;
-                @Move.performed += instance.OnMove;
-                @Move.canceled += instance.OnMove;
+                @Left.started += instance.OnLeft;
+                @Left.performed += instance.OnLeft;
+                @Left.canceled += instance.OnLeft;
+                @Right.started += instance.OnRight;
+                @Right.performed += instance.OnRight;
+                @Right.canceled += instance.OnRight;
             }
         }
     }
@@ -253,6 +282,7 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
     }
     public interface IPlayerActions
     {
-        void OnMove(InputAction.CallbackContext context);
+        void OnLeft(InputAction.CallbackContext context);
+        void OnRight(InputAction.CallbackContext context);
     }
 }

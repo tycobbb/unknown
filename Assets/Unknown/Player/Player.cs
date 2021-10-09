@@ -12,6 +12,9 @@ public class Player: MonoBehaviour {
     [Tooltip("the music player")]
     [SerializeField] Musicker mMusic;
 
+    [Tooltip("the pattern")]
+    [SerializeField] Pattern mPattern;
+
     // -- props --
     /// the musical key
     Key mKey;
@@ -24,6 +27,12 @@ public class Player: MonoBehaviour {
         // set props
         mKey = new Key(mKeyOf);
         mInputs = new PlayerInput().Player;
+    }
+
+    void Update() {
+        var l = mInputs.Left.ReadValue<Vector2>();
+        var a = Mathf.Repeat(-Vector2.SignedAngle(Vector2.down, l) + 360.0f, 360.0f);
+        mPattern.SetPercent(a / 360.0f);
     }
 
     void OnEnable() {

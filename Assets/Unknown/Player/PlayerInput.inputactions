@@ -6,10 +6,19 @@
             "id": "10f92ff5-4d3b-4aa2-98eb-75874ab01d03",
             "actions": [
                 {
-                    "name": "Move",
+                    "name": "Left",
                     "type": "Value",
                     "id": "17139cd4-30a8-4cb7-849a-f460c80024aa",
-                    "expectedControlType": "Stick",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Right",
+                    "type": "Value",
+                    "id": "82dc1676-bae9-4f5a-9ba7-1a1b581db4e6",
+                    "expectedControlType": "Vector2",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
@@ -23,7 +32,18 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
-                    "action": "Move",
+                    "action": "Left",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8a7e3d4c-1071-42b9-a58c-f0a0ca56d15b",
+                    "path": "<Gamepad>/rightStick",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "Right",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
