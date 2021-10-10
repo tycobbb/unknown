@@ -1,47 +1,45 @@
 using UnityEngine;
 
-/// the box and line pattern
-public class Pattern: MonoBehaviour {
-    // -- config --
-    [Header("config")]
-    [Tooltip("the pattern's color")]
-    [SerializeField] Color mColor = Color.magenta;
-
+/// the line pattern
+public struct Pattern {
     // -- props --
-    Vector2 mPoint0;
-    Vector2 mPoint1;
+    /// the anchor point
+    public Vector2 Point0 { get; private  set; }
+
+    /// the floating point
+    public Vector2 Point1 { get; private  set; }
 
     // -- lifecycle --
-    void Update() {
-        // draw box
-        var b0 = new Vector3(-0.5f, 0.0f);
-        var b1 = b0;
-
-        b1.x += 1.0f;
-        Debug.DrawLine(b0, b1, Color.magenta);
-
-        b0 = b1;
-        b1.y += 1.0f;
-        Debug.DrawLine(b0, b1, Color.magenta);
-
-        b0 = b1;
-        b1.x -= 1.0f;
-        Debug.DrawLine(b0, b1, Color.magenta);
-
-        b0 = b1;
-        b1.y -= 1.0f;
-        Debug.DrawLine(b0, b1, Color.magenta);
-
-        // draw line
-        var p0 = (Vector3)mPoint0;
-        var p1 = (Vector3)mPoint1;
-
-        p0.x -= 0.5f;
-        p1.x -= 0.5f;
-
-        Debug.Log($"color {mColor}");
-        Debug.DrawLine(p0, p1, mColor);
-    }
+    // void Update() {
+    //     // draw box
+    //     var b0 = new Vector3(-0.5f, 0.0f);
+    //     var b1 = b0;
+    //
+    //     b1.x += 1.0f;
+    //     Debug.DrawLine(b0, b1, Color.magenta);
+    //
+    //     b0 = b1;
+    //     b1.y += 1.0f;
+    //     Debug.DrawLine(b0, b1, Color.magenta);
+    //
+    //     b0 = b1;
+    //     b1.x -= 1.0f;
+    //     Debug.DrawLine(b0, b1, Color.magenta);
+    //
+    //     b0 = b1;
+    //     b1.y -= 1.0f;
+    //     Debug.DrawLine(b0, b1, Color.magenta);
+    //
+    //     // draw line
+    //     var p0 = (Vector3)mPoint0;
+    //     var p1 = (Vector3)mPoint1;
+    //
+    //     p0.x -= 0.5f;
+    //     p1.x -= 0.5f;
+    //
+    //     Debug.Log($"color {mColor}");
+    //     Debug.DrawLine(p0, p1, mColor);
+    // }
 
     // -- commands --
     public void SetPercent(float pct) {
@@ -64,7 +62,7 @@ public class Pattern: MonoBehaviour {
         p1.y += Mathf.Sin(at);
 
         // update props
-        mPoint0 = p0;
-        mPoint1 = p1;
+        Point0 = p0;
+        Point1 = p1;
     }
 }

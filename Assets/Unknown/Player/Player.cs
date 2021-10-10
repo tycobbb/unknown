@@ -8,20 +8,23 @@ public class Player: MonoBehaviour {
     [Tooltip("the player's musical key")]
     [SerializeField] Root mKeyOf = Root.C;
 
+    [Tooltip("the player's line color")]
+    [SerializeField] Color mColor;
+
     // -- nodes --
     [Header("nodes")]
     [Tooltip("the music player")]
     [SerializeField] Musicker mMusic;
 
-    [Tooltip("the pattern")]
-    [SerializeField] Pattern mPattern;
-
-    [Tooltip("the pattern")]
-    [SerializeField] Pattern mPattern2;
+    [Tooltip("the line renderer")]
+    [SerializeField] Shapes.Line mLine;
 
     // -- props --
     /// the musical key
     Key mKey;
+
+    /// the line pattern
+    Pattern mPattern;
 
     /// the player's inputs
     PlayerInput.PlayerActions mInputs;
@@ -30,12 +33,26 @@ public class Player: MonoBehaviour {
     void Awake() {
         // set props
         mKey = new Key(mKeyOf);
+        mPattern = new Pattern();
         mInputs = new PlayerInput().Player;
     }
 
     void Update() {
-        mPattern.SetPercent(ReadPercent(mInputs.Left));
-        mPattern2.SetPercent(ReadPercent(mInputs.Right));
+        // update style
+        mLine.Color = mColor;
+
+        // calc position from input
+        if (name == "Player1") {
+            mPattern.SetPercent(ReadPercent(mInputs.Left));
+        } else {
+            mPattern.SetPercent(ReadPercent(mInputs.Right));
+        }
+    }
+
+    void FixedUpdate() {
+        // render line
+        mLine.Start = mPattern.Point0;
+        mLine.End = mPattern.Point1;
     }
 
     void OnEnable() {
