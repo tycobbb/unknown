@@ -5,13 +5,14 @@ using UnityEngine;
 /// a thing that plays music
 public class Musicker: MonoBehaviour {
     // -- config --
-    /// the number of audio sources to create or keep
+    [Header("config")]
+    [Tooltip("the number of audio sources to create or keep")]
     [SerializeField] int mNumSources = 4;
 
-    /// the audio source to realize sound
+    [Tooltip("the audio source to realize sound")]
     [SerializeField] List<AudioSource> mSources;
 
-    /// their current instrument
+    [Tooltip("their current instrument")]
     [SerializeField] Instrument mInstrument;
 
     // -- props --
@@ -85,6 +86,12 @@ public class Musicker: MonoBehaviour {
 
         // advance the source
         mNextSource = (i + 1) % mNumSources;
+    }
+
+    // -- c/config
+    /// set the instrument
+    public void SetInstrument(Instrument instrument) {
+        mInstrument = instrument;
     }
 
     // -- queries --

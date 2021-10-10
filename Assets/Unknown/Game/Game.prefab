@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 1010824611441724979}
   - component: {fileID: 1010824611441724976}
   - component: {fileID: 1010824611441724978}
+  - component: {fileID: 133148305}
   m_Layer: 0
   m_Name: Game
   m_TagString: Untagged
@@ -44,6 +45,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f8dbced661d2f4bb89c69d979b7a87bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mPlayerConfigs:
+  - Name: Player1
+    Key: 0
+    Color: {r: 0.9433962, g: 0.28034887, b: 0.28034887, a: 1}
+    Instrument: {fileID: 0}
+  - Name: Player2
+    Key: 2
+    Color: {r: 0.28235292, g: 0.94509804, b: 0.9340523, a: 1}
+    Instrument: {fileID: 0}
 --- !u!114 &1010824611441724978
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -106,3 +116,47 @@ MonoBehaviour:
   m_DefaultActionMap: UI
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
+--- !u!114 &133148305
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1010824611441724977}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 621567455fd1c4ceb811cc8a00b6a1a5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_NotificationBehavior: 0
+  m_MaxPlayerCount: 2
+  m_AllowJoining: 1
+  m_JoinBehavior: 0
+  m_PlayerJoinedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_PlayerLeftEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_JoinAction:
+    m_UseReference: 0
+    m_Action:
+      m_Name: Join
+      m_Type: 0
+      m_ExpectedControlType: 
+      m_Id: e1a28179-3ef8-4907-86f4-52fe9e6bcb15
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+    m_Reference: {fileID: 0}
+  m_PlayerPrefab: {fileID: 4562596083273999880, guid: 588e1bc17f93f4a92aa22bcbcad46394, type: 3}
+  m_SplitScreen: 0
+  m_MaintainAspectRatioInSplitScreen: 0
+  m_FixedNumberOfSplitScreens: -1
+  m_SplitScreenRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1

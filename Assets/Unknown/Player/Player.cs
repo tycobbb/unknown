@@ -1,23 +1,21 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using I = UnityEngine.InputSystem;
+
+// the player requires an InputSystem.PlayerInput component for a
+// PlayerInputManager to spawn it, but we use the generated class to
+// actually check input.
 
 /// the player
+[RequireComponent(typeof(I.PlayerInput))]
 public class Player: MonoBehaviour {
-    // -- config --
-    [Header("config")]
-    [Tooltip("the player's musical key")]
-    [SerializeField] Root mKeyOf = Root.C;
-
-    [Tooltip("the player's line color")]
-    [SerializeField] Color mColor;
-
     // -- nodes --
     [Header("nodes")]
-    [Tooltip("the music player")]
-    [SerializeField] Musicker mMusic;
-
-    [Tooltip("the line renderer")]
+    [Tooltip("the player's line")]
     [SerializeField] Shapes.Line mLine;
+
+    [Tooltip("plays music on contact")]
+    [SerializeField] Musicker mMusic;
 
     // -- props --
     /// the musical key
@@ -32,21 +30,13 @@ public class Player: MonoBehaviour {
     // -- lifecycle --
     void Awake() {
         // set props
-        mKey = new Key(mKeyOf);
         mPattern = new Pattern();
         mInputs = new PlayerInput().Player;
     }
 
     void Update() {
-        // update style
-        mLine.Color = mColor;
-
         // calc position from input
-        if (name == "Player1") {
-            mPattern.SetPercent(ReadPercent(mInputs.Left));
-        } else {
-            mPattern.SetPercent(ReadPercent(mInputs.Right));
-        }
+        mPattern.SetPercent(ReadPercent(mInputs.Left));
     }
 
     void FixedUpdate() {
@@ -61,6 +51,15 @@ public class Player: MonoBehaviour {
 
     void OnDisable() {
         mInputs.Disable();
+    }
+
+    // -- commands --
+    /// init this player on join
+    public void Join(PlayerConfig config) {
+        name = config.Name;
+        mKey = new Key(config.Key);
+        mLine.Color = config.Color;
+        mMusic.SetInstrument(config.Instrument);
     }
 
     // -- queries --

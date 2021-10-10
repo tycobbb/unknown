@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 3835036758191427635}
   - component: {fileID: 3121701333654412697}
   - component: {fileID: 4346776038586292023}
+  - component: {fileID: 408289371547382750}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -47,10 +48,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe9cbee98a5404ec997d2a16a7b550f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mKeyOf: 0
-  mColor: {r: 0.8584906, g: 0.58251166, b: 0.19032574, a: 0}
-  mMusic: {fileID: 7025300543588707201}
   mLine: {fileID: 3835036758191427635}
+  mMusic: {fileID: 7025300543588707201}
 --- !u!114 &7025300543588707201
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -98,7 +97,7 @@ MonoBehaviour:
   end: {x: 1, y: 0, z: 0}
   thickness: 0.125
   thicknessSpace: 0
-  endCaps: 2
+  endCaps: 0
   matchDashSpacingToSize: 1
   dashed: 0
   dashStyle:
@@ -136,7 +135,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: d8dcf53039a8e5f468fb44f7e1a08f76, type: 2}
+  - {fileID: 2100000, guid: 6afefec347ded4848ac07cf2cc259ae2, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -158,3 +157,33 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &408289371547382750
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4562596083273999880}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Actions: {fileID: -944628639613478452, guid: bc70d07c77ce64ea68e5c2888d3f8d63, type: 3}
+  m_NotificationBehavior: 0
+  m_UIInputModule: {fileID: 0}
+  m_DeviceLostEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_DeviceRegainedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ControlsChangedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ActionEvents: []
+  m_NeverAutoSwitchControlSchemes: 0
+  m_DefaultControlScheme: Gamepad
+  m_DefaultActionMap: Player
+  m_SplitScreenIndex: -1
+  m_Camera: {fileID: 0}
