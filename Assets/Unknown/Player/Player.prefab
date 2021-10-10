@@ -90,13 +90,13 @@ MonoBehaviour:
   stencilRefID: 0
   stencilReadMask: 255
   stencilWriteMask: 255
-  geometry: 1
+  geometry: 0
   colorMode: 0
   colorEnd: {r: 1, g: 1, b: 1, a: 1}
   start: {x: 0, y: 0, z: 0}
   end: {x: 1, y: 0, z: 0}
-  thickness: 0.125
-  thicknessSpace: 0
+  thickness: 1
+  thicknessSpace: 2
   endCaps: 0
   matchDashSpacingToSize: 1
   dashed: 0
@@ -155,7 +155,7 @@ MeshRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!114 &408289371547382750
 MonoBehaviour:
