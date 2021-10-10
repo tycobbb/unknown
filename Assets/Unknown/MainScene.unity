@@ -216,6 +216,50 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!1 &305002373
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 305002375}
+  - component: {fileID: 305002374}
+  m_Layer: 0
+  m_Name: Pattern2
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &305002374
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 305002373}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cce7948b488a941a1ac988bc114009da, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mColor: {r: 0.252047, g: 0.8932414, b: 0.9056604, a: 0}
+--- !u!4 &305002375
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 305002373}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 7
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &680607397 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 1590977893336236947, guid: b09c71f5fea644b23833aef4f57855e2, type: 3}
@@ -386,6 +430,10 @@ PrefabInstance:
       propertyPath: mPattern
       value: 
       objectReference: {fileID: 1753414719}
+    - target: {fileID: 4562596083273999882, guid: 588e1bc17f93f4a92aa22bcbcad46394, type: 3}
+      propertyPath: mPattern2
+      value: 
+      objectReference: {fileID: 305002374}
     - target: {fileID: 7025300543588707201, guid: 588e1bc17f93f4a92aa22bcbcad46394, type: 3}
       propertyPath: mInstrument
       value: 
@@ -478,6 +526,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cce7948b488a941a1ac988bc114009da, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mColor: {r: 0.9245283, g: 0.53459287, b: 0.24857599, a: 0}
 --- !u!4 &1753414720
 Transform:
   m_ObjectHideFlags: 0

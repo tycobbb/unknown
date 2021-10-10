@@ -1,8 +1,9 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 /// the player
 public class Player: MonoBehaviour {
-    // -- tuning --
+    // -- config --
     [Header("config")]
     [Tooltip("the player's musical key")]
     [SerializeField] Root mKeyOf = Root.C;
@@ -14,6 +15,9 @@ public class Player: MonoBehaviour {
 
     [Tooltip("the pattern")]
     [SerializeField] Pattern mPattern;
+
+    [Tooltip("the pattern")]
+    [SerializeField] Pattern mPattern2;
 
     // -- props --
     /// the musical key
@@ -30,9 +34,8 @@ public class Player: MonoBehaviour {
     }
 
     void Update() {
-        var l = mInputs.Left.ReadValue<Vector2>();
-        var a = Mathf.Repeat(-Vector2.SignedAngle(Vector2.down, l) + 360.0f, 360.0f);
-        mPattern.SetPercent(a / 360.0f);
+        mPattern.SetPercent(ReadPercent(mInputs.Left));
+        mPattern2.SetPercent(ReadPercent(mInputs.Right));
     }
 
     void OnEnable() {
@@ -41,5 +44,14 @@ public class Player: MonoBehaviour {
 
     void OnDisable() {
         mInputs.Disable();
+    }
+
+    // -- queries --
+    /// read percent complete from stick dir (oriented down, clockwise)
+    float ReadPercent(InputAction stick) {
+        var d = stick.ReadValue<Vector2>();
+        var a = -Vector2.SignedAngle(Vector2.down, d);
+        a = Mathf.Repeat(a + 360.0f, 360.0f);
+        return a / 360.0f;
     }
 }
