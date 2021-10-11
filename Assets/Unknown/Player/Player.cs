@@ -34,17 +34,17 @@ public class Player: MonoBehaviour {
 
     // -- nodes --
     [Header("nodes")]
-    [Tooltip("the player's shape")]
-    [SerializeField] Shapes.ShapeGroup mShape;
-
     [Tooltip("the player's line")]
     [SerializeField] Shapes.Line mLine;
 
-    [Tooltip("the player's ghost endpoint")]
-    [SerializeField] Transform mGhost;
+    [Tooltip("the player's hand")]
+    [SerializeField] Transform mHand;
 
     [Tooltip("the player's ghost trail")]
     [SerializeField] Shapes.Line mTrail;
+
+    [Tooltip("the player's ghost endpoint")]
+    [SerializeField] Transform mGhost;
 
     [FormerlySerializedAs("mMusic")]
     [Tooltip("plays voice music")]
@@ -113,19 +113,7 @@ public class Player: MonoBehaviour {
         );
 
         // apply config
-        var cfg = mConfig;
-        name = cfg.Name;
-        mKey = new Key(cfg.Key);
-
-        // set line props
-        mShape.Color = cfg.Color;
-
-        // set music props
-        mVoice.Instrument = cfg.VoiceInstrument;
-        mFootsteps.Instrument = cfg.FootstepsInstrument;
-
-        // show score
-        mScore.AddPlayer(cfg);
+        Configure();
     }
 
     void Update() {
@@ -139,16 +127,43 @@ public class Player: MonoBehaviour {
         Move();
     }
 
-    void OnDrawGizmos() {
-        Handles.color = Color.magenta;
-        Handles.DrawSolidDisc(mHitbox.Position, Vector3.forward, mHitbox.Radius);
-    }
-
     // -- commands --
     /// init this player on join
     public void Join(PlayerConfig cfg) {
         Debug.Log($"{cfg.Name} joined");
         mConfig = cfg;
+    }
+
+    void Configure() {
+        var cfg = mConfig;
+
+        // apply config
+        name = cfg.Name;
+        mKey = new Key(cfg.Key);
+
+        // grab shapes
+        var hand = mHand.GetComponent<Shapes.Disc>();
+        var ghost = mGhost.GetComponent<Shapes.Disc>();
+
+        // decompose color
+        var c = cfg.Color;
+        Color.RGBToHSV(c, out var h, out var s, out var v);
+
+        // set colors
+        mLine.Color = c;
+        mTrail.Color = FromHsv(h + (h > 0.5f ? -0.3f : 0.3f), s, v, a: 0.5f);
+        ghost.Color = FromHsv(h, s - 0.3f, v + 0.5f, a: 0.5f);
+        hand.Color = ghost.Color;
+
+        // size hand
+        hand.Radius = mHitbox.Radius;
+
+        // set music props
+        mVoice.Instrument = cfg.VoiceInstrument;
+        mFootsteps.Instrument = cfg.FootstepsInstrument;
+
+        // show score
+        mScore.AddPlayer(cfg);
     }
 
     /// read move pattern
@@ -239,10 +254,10 @@ public class Player: MonoBehaviour {
         // render shapes
         mLine.Start = p0;
         mLine.End = pe;
+        mHand.localPosition = pe;
 
         mTrail.Start = p1;
         mTrail.End = pe;
-
         mGhost.localPosition = p1;
     }
 
@@ -275,6 +290,13 @@ public class Player: MonoBehaviour {
     /// check if the player's overlap
     public bool Overlaps(Player other) {
         return mHitbox.Overlaps(other.mHitbox);
+    }
+
+    /// get rgb color from hsv
+    Color FromHsv(float h, float s, float v, float a = 1.0f) {
+        var c = Color.HSVToRGB(Mathf.Repeat(h, 1.0f), s, v);
+        c.a = a;
+        return c;
     }
 
     // -- events --
