@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
+/// the game
 public class Game: MonoBehaviour {
     // -- config --
     [Header("config")]
@@ -37,7 +38,13 @@ public class Game: MonoBehaviour {
     }
 
     /// catch the player joined event
-    public void OnPlayerJoined(UnityEngine.InputSystem.PlayerInput input) {
+    public void OnPlayerJoined(Object obj) {
+        // this gets called on start with the game (?)
+        var input = obj as PlayerInput;
+        if (input == null) {
+            return;
+        }
+
         // get the player
         var player = input.GetComponent<Player>();
         if (player == null) {
@@ -45,7 +52,6 @@ public class Game: MonoBehaviour {
         }
 
         // grab the next config
-        Debug.Log($"i {mNumPlayers} cfgs {mPlayerConfigs}");
         var config = mPlayerConfigs[mNumPlayers];
         mNumPlayers++;
 

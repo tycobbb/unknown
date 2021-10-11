@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-/// the config for a Player
+/// a player's config
 [Serializable]
 public struct PlayerConfig {
     [Tooltip("the player's name")]

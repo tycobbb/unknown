@@ -1,13 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using I = UnityEngine.InputSystem;
 
-// the player requires an InputSystem.PlayerInput component for a
-// PlayerInputManager to spawn it, but we use the generated class to
-// actually check input.
-
-/// the player
-[RequireComponent(typeof(I.PlayerInput))]
+/// a player
 public class Player: MonoBehaviour {
     // -- nodes --
     [Header("nodes")]
@@ -17,6 +11,9 @@ public class Player: MonoBehaviour {
     [Tooltip("plays music on contact")]
     [SerializeField] Musicker mMusic;
 
+    [Tooltip("the input system input")]
+    [SerializeField] PlayerInput mInput;
+
     // -- props --
     /// the musical key
     Key mKey;
@@ -25,18 +22,18 @@ public class Player: MonoBehaviour {
     Pattern mPattern;
 
     /// the player's inputs
-    PlayerInput.PlayerActions mInputs;
+    PlayerActions mActions;
 
     // -- lifecycle --
     void Awake() {
         // set props
         mPattern = new Pattern();
-        mInputs = new PlayerInput().Player;
+        mActions = new PlayerActions(mInput);
     }
 
     void Update() {
         // calc position from input
-        mPattern.SetPercent(ReadPercent(mInputs.Left));
+        mPattern.SetPercent(ReadPercent(mActions.Left));
     }
 
     void FixedUpdate() {
@@ -45,28 +42,26 @@ public class Player: MonoBehaviour {
         mLine.End = mPattern.Point1;
     }
 
-    void OnEnable() {
-        mInputs.Enable();
-    }
-
-    void OnDisable() {
-        mInputs.Disable();
-    }
-
     // -- commands --
     /// init this player on join
-    public void Join(PlayerConfig config) {
-        name = config.Name;
-        mKey = new Key(config.Key);
-        mLine.Color = config.Color;
-        mMusic.SetInstrument(config.Instrument);
+    public void Join(PlayerConfig cfg) {
+        Debug.Log($"{cfg.Name} joined");
+
+        // set props
+        name = cfg.Name;
+        mKey = new Key(cfg.Key);
+
+        // set line props
+        mLine.Color = cfg.Color;
+
+        // set music props
+        mMusic.Instrument = cfg.Instrument;
     }
 
     // -- queries --
     /// read percent complete from stick dir (oriented down, clockwise)
-    float ReadPercent(InputAction stick) {
-        var d = stick.ReadValue<Vector2>();
-        var a = -Vector2.SignedAngle(Vector2.down, d);
+    float ReadPercent(Vector2 dir) {
+        var a = -Vector2.SignedAngle(Vector2.down, dir);
         a = Mathf.Repeat(a + 360.0f, 360.0f);
         return a / 360.0f;
     }

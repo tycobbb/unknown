@@ -88,10 +88,11 @@ public class Musicker: MonoBehaviour {
         mNextSource = (i + 1) % mNumSources;
     }
 
-    // -- c/config
-    /// set the instrument
-    public void SetInstrument(Instrument instrument) {
-        mInstrument = instrument;
+    // -- props/hot
+    /// the current instrument
+    public Instrument Instrument {
+        get => mInstrument;
+        set => mInstrument = value;
     }
 
     // -- queries --
