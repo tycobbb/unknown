@@ -9,11 +9,49 @@ public class Game: MonoBehaviour {
     [Tooltip("the configs for each player")]
     [SerializeField] PlayerConfig[] mPlayerConfigs;
 
+
     // -- props --
-    /// the current number of players
+    /// the current player count
     int mNumPlayers = 0;
 
+    /// the array of players
+    Player[] mPlayers = new Player[2];
+
+    /// if the players are colliding
+    bool mIsColliding = false;
+
+    // -- lifecycle --
+    void FixedUpdate() {
+        TryCollide();
+    }
+
     // -- commands --
+    /// collide the players together if necessary
+    void TryCollide() {
+        if (mNumPlayers != 2) {
+            return;
+        }
+
+        var player1 = mPlayers[0];
+        var player2 = mPlayers[1];
+
+        // if the collision state changed
+        var isColliding = player1.Overlaps(player2);
+        if (mIsColliding == isColliding) {
+            return;
+        }
+
+        // and it's colliding, send the enter event
+        if (isColliding) {
+            player1.OnCollision(player2);
+            player2.OnCollision(player1);
+        }
+
+        // update state
+        mIsColliding = isColliding;
+
+    }
+
     /// reset the current scene
     void Reset() {
         var scene = SceneManager.GetActiveScene();
@@ -39,23 +77,25 @@ public class Game: MonoBehaviour {
 
     /// catch the player joined event
     public void OnPlayerJoined(Object obj) {
-        // this gets called on start with the game (?)
+        // ignore call on startup where obj is the game (b/c it has an input?)
         var input = obj as PlayerInput;
         if (input == null) {
             return;
         }
 
-        // get the player
+        // make sure we have a player
         var player = input.GetComponent<Player>();
         if (player == null) {
             return;
         }
 
-        // grab the next config
-        var config = mPlayerConfigs[mNumPlayers];
-        mNumPlayers++;
+        var i = mNumPlayers;
 
-        // and prepare this player
-        player.Join(config);
+        // join the game
+        player.Join(mPlayerConfigs[i]);
+
+        // update state
+        mPlayers[i] = player;
+        mNumPlayers++;
     }
 }

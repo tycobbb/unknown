@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 5948105871509504811}
   - component: {fileID: 6432104835778700628}
   m_Layer: 0
-  m_Name: End
+  m_Name: Ghost
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -180,6 +180,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe9cbee98a5404ec997d2a16a7b550f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mHitbox:
+    Position: {x: 0, y: 0}
+    Radius: 0.025
   mWindupLength: 0.1
   mReleaseCurve:
     serializedVersion: 2
@@ -245,8 +248,8 @@ MonoBehaviour:
   mReleaseAlignment: 0.1
   mShape: {fileID: 2753920165041774194}
   mLine: {fileID: 3898287554920713603}
-  mEnd: {fileID: 5566517681654507246}
-  mOffset: {fileID: 2980957337658543330}
+  mGhost: {fileID: 7872479324776051326}
+  mTrail: {fileID: 2980957337658543330}
   mMusic: {fileID: 7025300543588707201}
   mInput: {fileID: 408289371547382750}
 --- !u!114 &7025300543588707201
@@ -445,7 +448,7 @@ GameObject:
   - component: {fileID: 1045495305748861781}
   - component: {fileID: 2565980699399791892}
   m_Layer: 0
-  m_Name: Offset
+  m_Name: Trail
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

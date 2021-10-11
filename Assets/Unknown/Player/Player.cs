@@ -1,12 +1,14 @@
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.Serialization;
 
 /// a player
 public class Player: MonoBehaviour {
     // -- tuning --
-    [FormerlySerializedAs("mFlickLength")]
     [Header("tuning")]
+    [Tooltip("the hitbox at the end of the line")]
+    [SerializeField] PlayerHitbox mHitbox;
+
     [Tooltip("the max length of the flick windup")]
     [SerializeField] float mWindupLength = 0.1f;
 
@@ -27,11 +29,11 @@ public class Player: MonoBehaviour {
     [Tooltip("the player's line")]
     [SerializeField] Shapes.Line mLine;
 
-    [Tooltip("the player's endpoint")]
-    [SerializeField] Shapes.Disc mEnd;
+    [Tooltip("the player's ghost endpoint")]
+    [SerializeField] Transform mGhost;
 
-    [Tooltip("the player's offset line")]
-    [SerializeField] Shapes.Line mOffset;
+    [Tooltip("the player's ghost trail")]
+    [SerializeField] Shapes.Line mTrail;
 
     [Tooltip("plays music on contact")]
     [SerializeField] Musicker mMusic;
@@ -73,6 +75,11 @@ public class Player: MonoBehaviour {
         Move();
     }
 
+    void OnDrawGizmos() {
+        Handles.color = Color.magenta;
+        Handles.DrawSolidDisc(mHitbox.Position, Vector3.forward, mHitbox.Radius);
+    }
+
     // -- commands --
     /// init this player on join
     public void Join(PlayerConfig cfg) {
@@ -91,7 +98,12 @@ public class Player: MonoBehaviour {
 
     /// read move pattern
     void ReadMove() {
-        mPattern.SetPercent(ReadPercent(mActions.Move));
+        // get angle relative to down vector
+        var a = -Vector2.SignedAngle(Vector2.down, mActions.Move);
+        a = Mathf.Repeat(a + 360.0f, 360.0f);
+
+        // apply as a percentage to pattern, down is 0%/100%
+        mPattern.SetPercent(a / 360.0f);
     }
 
     /// read flick offset
@@ -140,14 +152,17 @@ public class Player: MonoBehaviour {
         // get the flick-adjusted endpoint
         var pe = p1 + offset * mWindupLength;
 
+        // move the hitbox
+        mHitbox.Position = pe;
+
         // render shapes
         mLine.Start = p0;
         mLine.End = pe;
 
-        mOffset.Start = p1;
-        mOffset.End = pe;
+        mTrail.Start = p1;
+        mTrail.End = pe;
 
-        mEnd.transform.localPosition = p1;
+        mGhost.localPosition = p1;
     }
 
     /// release the flick, if necessary, modifying the offset
@@ -176,11 +191,14 @@ public class Player: MonoBehaviour {
     }
 
     // -- queries --
-    /// read percent complete from stick dir (oriented down, clockwise)
-    float ReadPercent(Vector2 dir) {
-        var a = -Vector2.SignedAngle(Vector2.down, dir);
-        a = Mathf.Repeat(a + 360.0f, 360.0f);
-        return a / 360.0f;
+    /// check if the player's overlap
+    public bool Overlaps(Player other) {
+        return mHitbox.Overlaps(other.mHitbox);
+    }
+
+    // -- events --
+    public void OnCollision(Player other) {
+        Debug.Log($"{name} colliding w/ {other.name}!");
     }
 
     // -- gestures --
