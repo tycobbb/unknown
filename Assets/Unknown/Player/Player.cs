@@ -4,13 +4,6 @@ using UnityEngine.Serialization;
 
 /// a player
 public class Player: MonoBehaviour {
-    // -- types --
-    struct Release {
-        /// the flick offset on release
-        Vector2 Offset;
-        /// the time on release
-        float Time;
-    }
     // -- tuning --
     [FormerlySerializedAs("mFlickLength")]
     [Header("tuning")]
@@ -54,13 +47,10 @@ public class Player: MonoBehaviour {
     Pattern mPattern;
 
     /// the flick windup offset
-    Vector2 mWindupOffset;
+    Vector2 mFlickOffset;
 
-    /// the flick offset when released
-    Vector2 mReleaseOffset;
-
-    float? mReleaseTime;
-    float mReleaseMax;
+    /// the release gesture
+    FlickRelease? mFlickRelease;
 
     /// the player's inputs
     PlayerActions mActions;
@@ -70,7 +60,6 @@ public class Player: MonoBehaviour {
         // set props
         mPattern = new Pattern();
         mActions = new PlayerActions(mInput);
-        mReleaseMax = mReleaseCurve.keys[1].value - 1.0f;
     }
 
     void Update() {
@@ -105,55 +94,50 @@ public class Player: MonoBehaviour {
         mPattern.SetPercent(ReadPercent(mActions.Move));
     }
 
-    /// read flick offset and velocity
+    /// read flick offset
     void ReadFlick() {
         // capture prev and next offset
-        var prev = mWindupOffset;
+        var prev = mFlickOffset;
         var next = mActions.Flick;
 
-        // update windup state
-        mWindupOffset = next;
+        // update state
+        mFlickOffset = next;
 
-        // given the stick delta
+        // if there is no active release, check for one
+        if (mFlickRelease == null) {
+            ReadFlickRelease(prev, next);
+        }
+    }
+
+    /// read release gesture given prev and next offset
+    void ReadFlickRelease(Vector2 prev, Vector2 next) {
+        // check alignment between previous direction and movement direction
         var delta = next - prev;
+        var align = Vector2.Dot(prev.normalized, delta.normalized);
 
-        // get alignment with previous frame
-        var pDir = prev.normalized;
-        var rDir = delta.normalized;
-        var align = Vector2.Dot(pDir, rDir);
-
-        // if the stick was released
-        if (mReleaseTime == null && Mathf.Abs(align + 1.0f) < mReleaseAlignment) {
-            mReleaseTime = Time.time;
-            mReleaseOffset = prev;
-            mReleaseCurve.keys[1].value = 1.0f + mReleaseMax * delta.magnitude;
+        // if it flipped (dot is ~ -1.0f), this is a release
+        if (Mathf.Abs(align + 1.0f) < mReleaseAlignment) {
+            mFlickRelease = new FlickRelease(
+                time: Time.time,
+                strength: delta.magnitude,
+                offset: prev
+            );
         }
     }
 
     /// move line into position
     void Move() {
-        // the pattern pos
+        // get pattern pos
         var p0 = mPattern.Point0;
         var p1 = mPattern.Point1;
 
-        // the flick offset
-        var offset = Vector2.zero;
-        if (mReleaseTime != null) {
-            var elapsed = Time.time - mReleaseTime.Value;
+        // get flick offset
+        var offset = mFlickOffset;
 
-            if (elapsed > mReleaseDuration) {
-                mReleaseTime = null;
-            } else {
-                var curved = mReleaseCurve.Evaluate(elapsed / mReleaseDuration);
-                offset = Vector2.LerpUnclamped(mReleaseOffset, Vector2.zero, curved);
-            }
-        }
+        // apply the release if necessary
+        TryReleaseFlick(ref offset);
 
-        if (mReleaseTime == null) {
-            offset = mWindupOffset;
-        }
-
-        // the flick-adjusted endpoint
+        // get the flick-adjusted endpoint
         var pe = p1 + offset * mWindupLength;
 
         // render shapes
@@ -166,11 +150,57 @@ public class Player: MonoBehaviour {
         mEnd.transform.localPosition = p1;
     }
 
+    /// release the flick, if necessary, modifying the offset
+    void TryReleaseFlick(ref Vector2 offset) {
+        if (mFlickRelease == null) {
+            return;
+        }
+
+        // check elapsed time
+        var release = mFlickRelease.Value;
+        var percent = (Time.time - release.Time) / mReleaseDuration;
+
+        // if the release finished, clear it
+        if (percent >= 1.0f) {
+            mFlickRelease = null;
+        }
+        // otherwise, use the release offset instead
+        else {
+            var curved = mReleaseCurve.Evaluate(percent);
+            if (curved > 1.0f) {
+                curved = 1.0f + (curved - 1.0f) * release.Strength;
+            }
+
+            offset = Vector2.LerpUnclamped(release.Offset, Vector2.zero, curved);
+        }
+    }
+
     // -- queries --
     /// read percent complete from stick dir (oriented down, clockwise)
     float ReadPercent(Vector2 dir) {
         var a = -Vector2.SignedAngle(Vector2.down, dir);
         a = Mathf.Repeat(a + 360.0f, 360.0f);
         return a / 360.0f;
+    }
+
+    // -- gestures --
+    /// the flick release gesture initial state
+    readonly struct FlickRelease {
+        /// the time on release
+        public readonly float Time;
+
+        /// the strength of the flick
+        public readonly float Strength;
+
+        /// the flick offset on release
+        public readonly Vector2 Offset;
+
+        // -- lifetime --
+        /// create a new gesture
+        public FlickRelease(float time, float strength, Vector2 offset) {
+            Time = time;
+            Strength = strength;
+            Offset = offset;
+        }
     }
 }
