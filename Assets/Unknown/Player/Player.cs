@@ -1,6 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 
 /// a player
 public class Player: MonoBehaviour {
@@ -35,8 +36,12 @@ public class Player: MonoBehaviour {
     [Tooltip("the player's ghost trail")]
     [SerializeField] Shapes.Line mTrail;
 
-    [Tooltip("plays music on contact")]
-    [SerializeField] Musicker mMusic;
+    [FormerlySerializedAs("mMusic")]
+    [Tooltip("plays voice music")]
+    [SerializeField] Musicker mVoice;
+
+    [Tooltip("plays footstep music")]
+    [SerializeField] Musicker mFootsteps;
 
     [Tooltip("the input system input")]
     [SerializeField] PlayerInput mInput;
@@ -45,20 +50,23 @@ public class Player: MonoBehaviour {
     /// the musical key
     Key mKey;
 
-    /// the line to play as the anchor changes
-    Line mAnchorLine;
-
     /// the line pattern
     Pattern mPattern;
-
-    /// the pattern's previous anchor index
-    int mPrevAnchorIndex;
 
     /// the flick windup offset
     Vector2 mFlickOffset;
 
     /// the release gesture
     FlickRelease? mFlickRelease;
+
+    /// the line to play as the anchor changes
+    Line mVoiceLine;
+
+    /// the loop to play as the player moves
+    Loop mFootstepsLoop;
+
+    /// the pattern's previous anchor index
+    int mPrevAnchorIndex = -1;
 
     /// the player's inputs
     PlayerActions mActions;
@@ -68,11 +76,18 @@ public class Player: MonoBehaviour {
         // set props
         mPattern = new Pattern();
         mActions = new PlayerActions(mInput);
-        mAnchorLine = new Line(
-            Tone.I,
+
+        mVoiceLine = new Line(
             Tone.III,
             Tone.V,
-            Tone.VII
+            Tone.VII,
+            Tone.I.Octave()
+        );
+
+        mFootstepsLoop = new Loop(
+            fade: 1.5f,
+            blend: 0.6f,
+            Tone.I
         );
     }
 
@@ -105,23 +120,32 @@ public class Player: MonoBehaviour {
         mShape.Color = cfg.Color;
 
         // set music props
-        mMusic.Instrument = cfg.Instrument;
+        mVoice.Instrument = cfg.VoiceInstrument;
+        mFootsteps.Instrument = cfg.FootstepsInstrument;
     }
 
     /// read move pattern
     void ReadMove() {
+        var dir = mActions.Move;
+
         // get angle relative to down vector
-        var a = -Vector2.SignedAngle(Vector2.down, mActions.Move);
+        var a = -Vector2.SignedAngle(Vector2.down, dir);
         a = Mathf.Repeat(a + 360.0f, 360.0f);
 
         // apply as a percentage to pattern, down is 0%/100%
         mPattern.MoveTo(a / 360.0f);
 
-        // see if the anchor index changed
+        // play footsteps when moving
+        var isMoving = dir != Vector2.zero;
+        if (isMoving != mFootsteps.IsPlayingLoop) {
+            mFootsteps.ToggleLoop(mFootstepsLoop, isMoving, mKey);
+        }
+
+        // play voice when anchor changes
         var i = mPattern.AnchorIndex;
         if (mPrevAnchorIndex != i) {
             mPrevAnchorIndex = i;
-            mMusic.PlayTone(mAnchorLine[i], mKey);
+            mVoice.PlayTone(mVoiceLine[i], mKey);
         }
     }
 

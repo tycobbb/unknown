@@ -142,6 +142,7 @@ GameObject:
   - component: {fileID: 4562596083273999881}
   - component: {fileID: 4562596083273999882}
   - component: {fileID: 7025300543588707201}
+  - component: {fileID: 5438007216668105070}
   - component: {fileID: 408289371547382750}
   - component: {fileID: 2753920165041774194}
   m_Layer: 0
@@ -250,7 +251,8 @@ MonoBehaviour:
   mLine: {fileID: 3898287554920713603}
   mGhost: {fileID: 7872479324776051326}
   mTrail: {fileID: 2980957337658543330}
-  mMusic: {fileID: 7025300543588707201}
+  mVoice: {fileID: 7025300543588707201}
+  mFootsteps: {fileID: 5438007216668105070}
   mInput: {fileID: 408289371547382750}
 --- !u!114 &7025300543588707201
 MonoBehaviour:
@@ -265,6 +267,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mNumSources: 1
+  mSources: []
+  mInstrument: {fileID: 0}
+--- !u!114 &5438007216668105070
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4562596083273999880}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca8ed092cd6654f1c9575cc95fbe061c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mNumSources: 2
   mSources: []
   mInstrument: {fileID: 0}
 --- !u!114 &408289371547382750

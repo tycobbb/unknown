@@ -14,5 +14,8 @@ public struct PlayerConfig {
     public Color Color;
 
     [Tooltip("the player's instrument")]
-    public Instrument Instrument;
+    public Instrument VoiceInstrument;
+
+    [Tooltip("the player's footsteps instrument")]
+    public Instrument FootstepsInstrument;
 }
