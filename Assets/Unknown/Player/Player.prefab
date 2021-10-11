@@ -180,7 +180,69 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe9cbee98a5404ec997d2a16a7b550f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mFlickLength: 0.1
+  mWindupLength: 0.1
+  mReleaseCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0.52527356
+      outSlope: 0.52527356
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.5915025
+    - serializedVersion: 3
+      time: 0.30302247
+      value: 3.0083725
+      inSlope: 0.167677
+      outSlope: 0.167677
+      tangentMode: 0
+      weightedMode: 3
+      inWeight: 0.49708164
+      outWeight: 0.36516073
+    - serializedVersion: 3
+      time: 0.7394721
+      value: 0.7720532
+      inSlope: 0.0042931978
+      outSlope: 0.0042931978
+      tangentMode: 0
+      weightedMode: 3
+      inWeight: 0.24706402
+      outWeight: 0.49020094
+    - serializedVersion: 3
+      time: 0.8470047
+      value: 1.1124381
+      inSlope: 0.82343036
+      outSlope: 0.82343036
+      tangentMode: 0
+      weightedMode: 3
+      inWeight: 0.31478858
+      outWeight: 0.24964754
+    - serializedVersion: 3
+      time: 0.93562216
+      value: 0.89562935
+      inSlope: -0.2746709
+      outSlope: -0.2746709
+      tangentMode: 0
+      weightedMode: 3
+      inWeight: 0.2833197
+      outWeight: 0.33144742
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 1
+      inWeight: 0.7849573
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  mReleaseDuration: 0.5
+  mReleaseAlignment: 0.1
   mShape: {fileID: 2753920165041774194}
   mLine: {fileID: 3898287554920713603}
   mEnd: {fileID: 5566517681654507246}
