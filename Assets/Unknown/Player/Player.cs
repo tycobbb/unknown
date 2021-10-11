@@ -14,11 +14,12 @@ public class Player: MonoBehaviour {
     [Tooltip("the hitbox at the end of the line")]
     [SerializeField] PlayerHitbox mHitbox;
 
-    [FormerlySerializedAs("mWindupLength")]
+    [Tooltip("the move speed, degrees for a full rotation")]
+    [SerializeField] float mMoveSpeed = 720.0f;
+
     [Tooltip("the max length of the flick windup")]
     [SerializeField] float mFlickWindup = 0.1f;
 
-    [FormerlySerializedAs("mWindupPitch")]
     [Tooltip("the max pitch shift of the flick windup")]
     [SerializeField] float mFlickPitch = 0.3f;
 
@@ -64,6 +65,12 @@ public class Player: MonoBehaviour {
 
     /// the line pattern
     Pattern mPattern;
+
+    /// the current move dir
+    Vector2 mMoveDir;
+
+    /// the accumulated move angle
+    float mMoveAngle;
 
     /// the flick windup offset
     Vector2 mFlickOffset;
@@ -146,17 +153,25 @@ public class Player: MonoBehaviour {
 
     /// read move pattern
     void ReadMove() {
-        var dir = mActions.Move;
+        var nDir = mActions.Move;
+        var pDir = mMoveDir;
 
-        // get angle relative to down vector
-        var a = -Vector2.SignedAngle(Vector2.down, dir);
-        a = Mathf.Repeat(a + 360.0f, 360.0f);
+        // update move dir
+        mMoveDir = nDir;
+
+        // add the angle between prev and next to the move angle
+        if (pDir != Vector2.zero) {
+            mMoveAngle = Mathf.Repeat(
+                mMoveAngle + Vector2.SignedAngle(nDir, pDir),
+                mMoveSpeed
+            );
+        }
 
         // apply as a percentage to pattern, down is 0%/100%
-        mPattern.MoveTo(a / 360.0f);
+        mPattern.MoveTo(mMoveAngle / mMoveSpeed);
 
         // play footsteps when moving
-        var isMoving = dir != Vector2.zero;
+        var isMoving = nDir != Vector2.zero;
         if (isMoving != mFootsteps.IsPlayingLoop) {
             mFootsteps.ToggleLoop(mFootstepsLoop, isMoving, mKey);
         }

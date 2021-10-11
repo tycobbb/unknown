@@ -184,8 +184,9 @@ MonoBehaviour:
   mHitbox:
     Position: {x: 0, y: 0}
     Radius: 0.025
-  mWindupLength: 0.1
-  mWindupPitch: 0.33333334
+  mMoveSpeed: 3600
+  mFlickWindup: 0.2
+  mFlickPitch: 0.33333334
   mReleaseCurve:
     serializedVersion: 2
     m_Curve:
