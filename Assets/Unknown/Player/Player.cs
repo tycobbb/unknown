@@ -3,10 +3,24 @@ using UnityEngine.InputSystem;
 
 /// a player
 public class Player: MonoBehaviour {
+    // -- tuning --
+    [Header("tuning")]
+    [Tooltip("the maximum length of a flick")]
+    [SerializeField] float mFlickLength = 0.1f;
+
     // -- nodes --
     [Header("nodes")]
+    [Tooltip("the player's shape")]
+    [SerializeField] Shapes.ShapeGroup mShape;
+
     [Tooltip("the player's line")]
     [SerializeField] Shapes.Line mLine;
+
+    [Tooltip("the player's endpoint")]
+    [SerializeField] Shapes.Disc mEnd;
+
+    [Tooltip("the player's offset line")]
+    [SerializeField] Shapes.Line mOffset;
 
     [Tooltip("plays music on contact")]
     [SerializeField] Musicker mMusic;
@@ -21,6 +35,12 @@ public class Player: MonoBehaviour {
     /// the line pattern
     Pattern mPattern;
 
+    /// the flick offset
+    Vector2 mFlickOffset;
+
+    /// the flick speed
+    Vector2 mFlickSpeed;
+
     /// the player's inputs
     PlayerActions mActions;
 
@@ -32,14 +52,12 @@ public class Player: MonoBehaviour {
     }
 
     void Update() {
-        // calc position from input
-        mPattern.SetPercent(ReadPercent(mActions.Left));
-    }
+        // update state from input
+        ReadMove();
+        ReadFlick();
 
-    void FixedUpdate() {
-        // render line
-        mLine.Start = mPattern.Point0;
-        mLine.End = mPattern.Point1;
+        // move line
+        Move();
     }
 
     // -- commands --
@@ -52,10 +70,44 @@ public class Player: MonoBehaviour {
         mKey = new Key(cfg.Key);
 
         // set line props
-        mLine.Color = cfg.Color;
+        mShape.Color = cfg.Color;
 
         // set music props
         mMusic.Instrument = cfg.Instrument;
+    }
+
+    /// read move pattern
+    void ReadMove() {
+        mPattern.SetPercent(ReadPercent(mActions.Move));
+    }
+
+    /// read flick offset and velocity
+    void ReadFlick() {
+        // capture prev and next offset
+        var prev = mFlickOffset;
+        var next = mActions.Flick;
+
+        // update state
+        mFlickOffset = next;
+    }
+
+    /// move line into position
+    void Move() {
+        // the pattern pos
+        var p0 = mPattern.Point0;
+        var p1 = mPattern.Point1;
+
+        // the flick-adjusted endpoint
+        var pe = p1 + mFlickOffset * mFlickLength;
+
+        // render shapes
+        mLine.Start = p0;
+        mLine.End = pe;
+
+        mOffset.Start = p1;
+        mOffset.End = pe;
+
+        mEnd.transform.localPosition = p1;
     }
 
     // -- queries --

@@ -4,27 +4,27 @@ using UnityEngine.InputSystem;
 /// the player's actions (wraps input)
 public class PlayerActions {
     // -- props --
-    /// the left analog stick
-    InputAction mLeft;
+    /// the move action
+    InputAction mMove;
 
-    /// the right analog stick
-    InputAction mRight;
+    /// the flick action
+    InputAction mFlick;
 
     // -- lifetime --
     /// create a new actions wrapper
     public PlayerActions(PlayerInput input) {
-        mLeft = input.currentActionMap["Left"];
-        mRight = input.currentActionMap["Right"];
+        mMove = input.currentActionMap["Move"];
+        mFlick = input.currentActionMap["Flick"];
     }
 
     // -- queries --
-    /// the left stick position
-    public Vector2 Left {
-        get => mLeft.ReadValue<Vector2>();
+    /// the move position
+    public Vector2 Move {
+        get => mMove.ReadValue<Vector2>();
     }
 
-    /// the right stick position
-    public Vector2 Right {
-        get => mRight.ReadValue<Vector2>();
+    /// the flick position
+    public Vector2 Flick {
+        get => mFlick.ReadValue<Vector2>();
     }
 }
