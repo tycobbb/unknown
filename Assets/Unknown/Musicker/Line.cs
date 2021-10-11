@@ -22,8 +22,13 @@ public sealed class Line {
     }
 
     // -- queries --
-    /// get the current tone
+    /// the current tone
     public Tone Curr() {
         return mTones[mCurr];
+    }
+
+    /// the tone at the position
+    public Tone this[int i] {
+        get => mTones[i];
     }
 }

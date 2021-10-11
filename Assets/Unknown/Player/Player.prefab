@@ -264,7 +264,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca8ed092cd6654f1c9575cc95fbe061c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mNumSources: 3
+  mNumSources: 1
   mSources: []
   mInstrument: {fileID: 0}
 --- !u!114 &408289371547382750

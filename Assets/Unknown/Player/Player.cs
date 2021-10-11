@@ -45,8 +45,14 @@ public class Player: MonoBehaviour {
     /// the musical key
     Key mKey;
 
+    /// the line to play as the anchor changes
+    Line mAnchorLine;
+
     /// the line pattern
     Pattern mPattern;
+
+    /// the pattern's previous anchor index
+    int mPrevAnchorIndex;
 
     /// the flick windup offset
     Vector2 mFlickOffset;
@@ -62,6 +68,12 @@ public class Player: MonoBehaviour {
         // set props
         mPattern = new Pattern();
         mActions = new PlayerActions(mInput);
+        mAnchorLine = new Line(
+            Tone.I,
+            Tone.III,
+            Tone.V,
+            Tone.VII
+        );
     }
 
     void Update() {
@@ -103,7 +115,14 @@ public class Player: MonoBehaviour {
         a = Mathf.Repeat(a + 360.0f, 360.0f);
 
         // apply as a percentage to pattern, down is 0%/100%
-        mPattern.SetPercent(a / 360.0f);
+        mPattern.MoveTo(a / 360.0f);
+
+        // see if the anchor index changed
+        var i = mPattern.AnchorIndex;
+        if (mPrevAnchorIndex != i) {
+            mPrevAnchorIndex = i;
+            mMusic.PlayTone(mAnchorLine[i], mKey);
+        }
     }
 
     /// read flick offset
