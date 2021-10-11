@@ -10,13 +10,21 @@ public class Score: MonoBehaviour {
     }
 
     // -- config --
-    [Tooltip("the score label")]
-    [SerializeField] TMP_Text mLabel;
+    [Tooltip("the player score labels")]
+    [SerializeField] TMP_Text[] mLabels;
 
     // -- lifecycle --
     void Awake() {
         #if !UNITY_EDITOR && UNITY_WEBGL
-        mLabel.fontSize *= 2.5f;
+        foreach (var label of mLabels) {
+            label.fontSize *= 2.5f;
+        }
         #endif
+    }
+
+    // -- commands --
+    /// add the player to the score display
+    public void AddPlayer(PlayerConfig cfg) {
+        mLabels[cfg.Index].color = cfg.Color;
     }
 }

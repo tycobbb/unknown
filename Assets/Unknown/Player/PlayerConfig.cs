@@ -4,6 +4,9 @@ using UnityEngine;
 /// a player's config
 [Serializable]
 public struct PlayerConfig {
+    [Tooltip("the players index")]
+    public int Index;
+
     [Tooltip("the player's name")]
     public string Name;
 

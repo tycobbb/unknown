@@ -5,6 +5,10 @@ using UnityEngine.Serialization;
 
 /// a player
 public class Player: MonoBehaviour {
+    // -- deps --
+    /// the score module
+    Score mScore;
+
     // -- tuning --
     [Header("tuning")]
     [Tooltip("the hitbox at the end of the line")]
@@ -52,6 +56,9 @@ public class Player: MonoBehaviour {
     [SerializeField] PlayerInput mInput;
 
     // -- props --
+    /// the player's config
+    PlayerConfig mConfig;
+
     /// the musical key
     Key mKey;
 
@@ -78,6 +85,9 @@ public class Player: MonoBehaviour {
 
     // -- lifecycle --
     void Awake() {
+        // set deps
+        mScore = Score.Get;
+
         // set props
         mPattern = new Pattern();
         mActions = new PlayerActions(mInput);
@@ -94,6 +104,21 @@ public class Player: MonoBehaviour {
             blend: 0.6f,
             Tone.I
         );
+
+        // apply config
+        var cfg = mConfig;
+        name = cfg.Name;
+        mKey = new Key(cfg.Key);
+
+        // set line props
+        mShape.Color = cfg.Color;
+
+        // set music props
+        mVoice.Instrument = cfg.VoiceInstrument;
+        mFootsteps.Instrument = cfg.FootstepsInstrument;
+
+        // show score
+        mScore.AddPlayer(cfg);
     }
 
     void Update() {
@@ -116,17 +141,7 @@ public class Player: MonoBehaviour {
     /// init this player on join
     public void Join(PlayerConfig cfg) {
         Debug.Log($"{cfg.Name} joined");
-
-        // set props
-        name = cfg.Name;
-        mKey = new Key(cfg.Key);
-
-        // set line props
-        mShape.Color = cfg.Color;
-
-        // set music props
-        mVoice.Instrument = cfg.VoiceInstrument;
-        mFootsteps.Instrument = cfg.FootstepsInstrument;
+        mConfig = cfg;
     }
 
     /// read move pattern

@@ -9,7 +9,6 @@ public class Game: MonoBehaviour {
     [Tooltip("the configs for each player")]
     [SerializeField] PlayerConfig[] mPlayerConfigs;
 
-
     // -- props --
     /// the current player count
     int mNumPlayers = 0;
