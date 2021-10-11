@@ -26,6 +26,18 @@ public class Game: MonoBehaviour {
     }
 
     // -- commands --
+    /// add a new player to the game
+    void AddPlayer(Player player) {
+        var i = mNumPlayers;
+
+        // prepare player
+        player.Join(mPlayerConfigs[i]);
+
+        // add to game
+        mPlayers[i] = player;
+        mNumPlayers++;
+    }
+
     /// collide the players together if necessary
     void TryCollide() {
         if (mNumPlayers != 2) {
@@ -49,7 +61,6 @@ public class Game: MonoBehaviour {
 
         // update state
         mIsColliding = isColliding;
-
     }
 
     /// reset the current scene
@@ -89,13 +100,6 @@ public class Game: MonoBehaviour {
             return;
         }
 
-        var i = mNumPlayers;
-
-        // join the game
-        player.Join(mPlayerConfigs[i]);
-
-        // update state
-        mPlayers[i] = player;
-        mNumPlayers++;
+        AddPlayer(player);
     }
 }

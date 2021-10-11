@@ -152,6 +152,14 @@ public class Musicker: MonoBehaviour {
         PlayClip(mInstrument.RandClip());
     }
 
+    // -- c/config
+    /// set the pitch of this player
+    public void SetPitch(float pitch) {
+        foreach (var source in mSources) {
+            source.pitch = pitch;
+        }
+    }
+
     // -- c/helpers
     /// play a clip on the next source
     void PlayClip(AudioClip clip) {

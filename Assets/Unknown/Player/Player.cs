@@ -10,8 +10,13 @@ public class Player: MonoBehaviour {
     [Tooltip("the hitbox at the end of the line")]
     [SerializeField] PlayerHitbox mHitbox;
 
+    [FormerlySerializedAs("mWindupLength")]
     [Tooltip("the max length of the flick windup")]
-    [SerializeField] float mWindupLength = 0.1f;
+    [SerializeField] float mFlickWindup = 0.1f;
+
+    [FormerlySerializedAs("mWindupPitch")]
+    [Tooltip("the max pitch shift of the flick windup")]
+    [SerializeField] float mFlickPitch = 0.3f;
 
     [Tooltip("the curve for the flick release")]
     [SerializeField] AnimationCurve mReleaseCurve;
@@ -192,8 +197,11 @@ public class Player: MonoBehaviour {
         // apply the release if necessary
         TryReleaseFlick(ref offset);
 
+        // update move pitch based on offset
+        mFootsteps.SetPitch(1.0f + offset.magnitude * mFlickPitch);
+
         // get the flick-adjusted endpoint
-        var pe = p1 + offset * mWindupLength;
+        var pe = p1 + offset * mFlickWindup;
 
         // move the hitbox
         mHitbox.Position = pe;
