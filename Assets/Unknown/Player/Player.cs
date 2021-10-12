@@ -78,7 +78,7 @@ public class Player: MonoBehaviour {
     float mFlickSpeed;
 
     /// the release gesture
-    FlickRelease? mFlickRelease;
+    FlickRelease mFlickRelease;
 
     /// a line as the player's anchor changes
     Line mVoiceLine;
