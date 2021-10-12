@@ -29,6 +29,12 @@ public readonly struct Quality {
         Tone.I.Octave()
     );
 
+    /// a minor third
+    public static Quality Min3 = new Quality(
+        Tone.I,
+        Tone.III.Flat()
+    );
+
     /// a major 7th chord quality
     public static Quality Maj7 = new Quality(
         Tone.I,

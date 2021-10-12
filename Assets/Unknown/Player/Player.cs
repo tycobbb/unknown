@@ -1,4 +1,3 @@
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
@@ -75,14 +74,23 @@ public class Player: MonoBehaviour {
     /// the flick windup offset
     Vector2 mFlickOffset;
 
+    /// the current flick speed
+    float mFlickSpeed;
+
     /// the release gesture
     FlickRelease? mFlickRelease;
 
-    /// the line to play as the anchor changes
+    /// a line as the player's anchor changes
     Line mVoiceLine;
 
-    /// the loop to play as the player moves
+    /// a loop to when moving
     Loop mFootstepsLoop;
+
+    /// a chord on hit
+    Chord mHitChord;
+
+    /// a chord on getting hit
+    Chord mHurtChord;
 
     /// the pattern's previous anchor index
     int mPrevAnchorIndex = -1;
@@ -99,6 +107,7 @@ public class Player: MonoBehaviour {
         mPattern = new Pattern();
         mActions = new PlayerActions(mInput);
 
+        // set music
         mVoiceLine = new Line(
             Tone.III,
             Tone.V,
@@ -110,6 +119,16 @@ public class Player: MonoBehaviour {
             fade: 1.5f,
             blend: 0.6f,
             Tone.I
+        );
+
+        mHitChord = new Chord(
+            Tone.V,
+            Quality.P5
+        );
+
+        mHurtChord = new Chord(
+            Tone.II,
+            Quality.Min3
         );
 
         // apply config
@@ -130,15 +149,16 @@ public class Player: MonoBehaviour {
     // -- commands --
     /// init this player on join
     public void Join(PlayerConfig cfg) {
-        Debug.Log($"{cfg.Name} joined");
+        name = $"Player{cfg.Index}";
         mConfig = cfg;
+
+        Debug.Log($"{name} joined");
     }
 
     void Configure() {
         var cfg = mConfig;
 
         // apply config
-        name = cfg.Name;
         mKey = new Key(cfg.Key);
 
         // grab shapes
@@ -162,6 +182,9 @@ public class Player: MonoBehaviour {
         mVoice.Instrument = cfg.VoiceInstrument;
         mFootsteps.Instrument = cfg.FootstepsInstrument;
 
+        // set initial position
+        mMoveAngle = mMoveSpeed * cfg.Percent;
+
         // show score
         mScore.AddPlayer(cfg);
     }
@@ -177,7 +200,7 @@ public class Player: MonoBehaviour {
         // add the angle between prev and next to the move angle
         if (pDir != Vector2.zero) {
             mMoveAngle = Mathf.Repeat(
-                mMoveAngle + Vector2.SignedAngle(nDir, pDir),
+                mMoveAngle + Vector2.SignedAngle(pDir, nDir),
                 mMoveSpeed
             );
         }
@@ -225,7 +248,7 @@ public class Player: MonoBehaviour {
             mFlickRelease = new FlickRelease(
                 time: Time.time,
                 strength: delta.magnitude,
-                offset: prev
+                initial: prev
             );
         }
     }
@@ -268,7 +291,7 @@ public class Player: MonoBehaviour {
         }
 
         // check elapsed time
-        var release = mFlickRelease.Value;
+        var release = mFlickRelease;
         var percent = (Time.time - release.Time) / mReleaseDuration;
 
         // if the release finished, clear it
@@ -282,7 +305,10 @@ public class Player: MonoBehaviour {
                 curved = 1.0f + (curved - 1.0f) * release.Strength;
             }
 
-            offset = Vector2.LerpUnclamped(release.Offset, Vector2.zero, curved);
+            offset = Vector2.LerpUnclamped(release.Initial, Vector2.zero, curved);
+
+            // move release to offset to calc speed
+            release.MoveTo(offset, Time.fixedDeltaTime);
         }
     }
 
@@ -290,6 +316,11 @@ public class Player: MonoBehaviour {
     /// check if the player's overlap
     public bool Overlaps(Player other) {
         return mHitbox.Overlaps(other.mHitbox);
+    }
+
+    /// if this player is releasing
+    bool IsReleasing {
+       get => mFlickRelease != null;
     }
 
     /// get rgb color from hsv
@@ -301,27 +332,53 @@ public class Player: MonoBehaviour {
 
     // -- events --
     public void OnCollision(Player other) {
-        Debug.Log($"{name} colliding w/ {other.name}!");
+        // play the chord
+        if (IsReleasing) {
+            mVoice.PlayChord(mHitChord, mKey);
+        } else if (other.IsReleasing) {
+            mVoice.PlayChord(mHurtChord, mKey);
+        }
+
+        // record the hit
+        if (mFlickRelease != null) {
+            mScore.RecordHit(mConfig, mFlickRelease.Speed);
+        }
     }
 
     // -- gestures --
     /// the flick release gesture initial state
-    readonly struct FlickRelease {
+    public sealed class FlickRelease {
         /// the time on release
         public readonly float Time;
 
         /// the strength of the flick
         public readonly float Strength;
 
-        /// the flick offset on release
-        public readonly Vector2 Offset;
+        /// the initial flick offset
+        public readonly Vector2 Initial;
+
+        /// the current flick offset
+        public Vector2 Current { get; private set;  }
+
+        /// the current flick speed
+        public float Speed { get; private set; }
 
         // -- lifetime --
         /// create a new gesture
-        public FlickRelease(float time, float strength, Vector2 offset) {
+        public FlickRelease(float time, float strength, Vector2 initial) {
             Time = time;
             Strength = strength;
-            Offset = offset;
+            Initial = initial;
+        }
+
+        // -- commands --
+        /// move flick to offset and calculate speed
+        public void MoveTo(Vector2 offset, float deltaTime) {
+            var prev = Current;
+            var next = offset;
+
+            Current = next;
+            Speed = Vector2.Distance(prev, next) / deltaTime;
         }
     }
 }

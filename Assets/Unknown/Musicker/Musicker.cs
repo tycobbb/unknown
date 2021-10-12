@@ -53,7 +53,7 @@ public class Musicker: MonoBehaviour {
 
     /// play the current chord in a progression and advance it
     public void PlayProgression(Progression prog, float interval = 0.0f, Key? key = null) {
-        PlayChord(prog.Curr(), interval, key);
+        PlayArp(prog.Curr(), interval, key);
         prog.Advance();
     }
 
@@ -120,8 +120,13 @@ public class Musicker: MonoBehaviour {
         Reset();
     }
 
-    /// play the clips in the chord. pass an interval to arpeggiate.
-    public void PlayChord(Chord chord, float interval = 0.0f, Key? key = null) {
+    /// play the clips in the chord
+    public void PlayChord(Chord chord, Key? key = null) {
+        PlayArp(chord, 0.0f, key);
+    }
+
+    /// play the clips in the chord, pass an interval to arpeggiate
+    public void PlayArp(Chord chord, float interval, Key? key = null) {
         StartCoroutine(PlayChordAsync(chord, interval, key));
     }
 

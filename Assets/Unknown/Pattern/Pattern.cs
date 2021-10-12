@@ -32,7 +32,6 @@ public struct Pattern {
         p1.x += Mathf.Cos(at);
         p1.y += Mathf.Sin(at);
 
-
         // update props
         Percent = pct;
         Point0 = p0;

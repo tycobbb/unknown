@@ -3,18 +3,18 @@ using UnityEngine;
 
 /// a player's config
 [Serializable]
-public struct PlayerConfig {
+public sealed class PlayerConfig {
     [Tooltip("the players index")]
     public int Index;
-
-    [Tooltip("the player's name")]
-    public string Name;
 
     [Tooltip("the player's musical key")]
     public Root Key;
 
     [Tooltip("the player's line color")]
     public Color Color;
+
+    [Tooltip("the player's initial percent")]
+    public float Percent;
 
     [Tooltip("the player's instrument")]
     public Instrument VoiceInstrument;

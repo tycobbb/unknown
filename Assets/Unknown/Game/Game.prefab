@@ -46,14 +46,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mPlayerConfigs:
-  - Name: Player1
+  - Index: 0
     Key: 0
-    Color: {r: 0.9433962, g: 0.28034887, b: 0.28034887, a: 1}
-    Instrument: {fileID: 0}
-  - Name: Player2
+    Color: {r: 0.94509804, g: 0.28235292, b: 0.51431364, a: 1}
+    Percent: 0
+    VoiceInstrument: {fileID: 0}
+    FootstepsInstrument: {fileID: 0}
+  - Index: 1
     Key: 2
-    Color: {r: 0.28235292, g: 0.94509804, b: 0.9340523, a: 1}
-    Instrument: {fileID: 0}
+    Color: {r: 0.28235292, g: 0.94509804, b: 0.65790844, a: 1}
+    Percent: 0.49999
+    VoiceInstrument: {fileID: 0}
+    FootstepsInstrument: {fileID: 0}
 --- !u!114 &1010824611441724978
 MonoBehaviour:
   m_ObjectHideFlags: 0
