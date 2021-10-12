@@ -1,4 +1,6 @@
 using System;
+// ReSharper disable once RedundantUsingDirective
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -43,6 +45,14 @@ public class Score: MonoBehaviour {
     // -- lifecycle --
     void Awake() {
         #if !UNITY_EDITOR && UNITY_WEBGL
+        var labels = new List<TMP_Text>();
+        labels.Add(mTimerLabel);
+        labels.AddRange(mFinishTimeLabels);
+        labels.AddRange(mScoreLabels);
+
+        foreach (var label in labels) {
+            label.fontSize *= 2.5f;
+        }
         #endif
     }
 

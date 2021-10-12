@@ -380,6 +380,7 @@ MonoBehaviour:
     m_RotationOrder: 4
   mReleaseDuration: 0.5
   mReleaseAlignment: 0.1
+  mAnimDuration: 0.05
   mLine: {fileID: 3898287554920713603}
   mHand: {fileID: 6117586667251438520}
   mTrail: {fileID: 2980957337658543330}

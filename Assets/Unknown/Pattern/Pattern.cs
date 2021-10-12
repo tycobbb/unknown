@@ -9,8 +9,9 @@ public struct Pattern {
     /// the floating point
     public Vector2 Point1 { get; private set; }
 
+    // -- p/private
     /// the current percent
-    public float Percent { get; private set; }
+    float mPercent;
 
     // -- commands --
     public void MoveTo(float pct) {
@@ -33,14 +34,14 @@ public struct Pattern {
         p1.y += Mathf.Sin(at);
 
         // update props
-        Percent = pct;
         Point0 = p0;
         Point1 = p1;
+        mPercent = pct;
     }
 
     // -- queries --
     /// the current anchor index
     public int AnchorIndex {
-        get => Mathf.Min(Mathf.FloorToInt(Percent / 0.25f), 3);
+        get => Mathf.Min(Mathf.FloorToInt(mPercent / 0.25f), 3);
     }
 }

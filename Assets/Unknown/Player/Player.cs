@@ -1,3 +1,5 @@
+using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
@@ -30,6 +32,9 @@ public class Player: MonoBehaviour {
 
     [Tooltip("the min alignment to detect a flick release")]
     [SerializeField] float mReleaseAlignment = 0.1f;
+
+    [Tooltip("the duration to smooth movements")]
+    [SerializeField] float mAnimDuration = 0.1f;
 
     // -- nodes --
     [Header("nodes")]
@@ -74,11 +79,11 @@ public class Player: MonoBehaviour {
     /// the flick windup offset
     Vector2 mFlickOffset;
 
-    /// the current flick speed
-    float mFlickSpeed;
-
     /// the release gesture
     FlickRelease mFlickRelease;
+
+    /// the pattern's anchor index
+    Draft<int> mAnchorIndex = new Draft<int>(-1);
 
     /// a line as the player's anchor changes
     Line mVoiceLine;
@@ -91,9 +96,6 @@ public class Player: MonoBehaviour {
 
     /// a chord on getting hit
     Chord mHurtChord;
-
-    /// the pattern's previous anchor index
-    int mPrevAnchorIndex = -1;
 
     /// the player's inputs
     PlayerActions mActions;
@@ -216,8 +218,8 @@ public class Player: MonoBehaviour {
 
         // play voice when anchor changes
         var i = mPattern.AnchorIndex;
-        if (mPrevAnchorIndex != i) {
-            mPrevAnchorIndex = i;
+        mAnchorIndex.Val = i;
+        if (mAnchorIndex.IsDirty) {
             mVoice.PlayTone(mVoiceLine[i], mKey);
         }
     }
@@ -259,35 +261,78 @@ public class Player: MonoBehaviour {
         var p0 = mPattern.Point0;
         var p1 = mPattern.Point1;
 
-        // get flick offset
+        // get flick offset, releasing flick if necessary
         var offset = mFlickOffset;
-
-        // apply the release if necessary
-        TryReleaseFlick(ref offset);
-
-        // update move pitch based on offset
-        mFootsteps.SetPitch(1.0f + offset.magnitude * mFlickPitch);
+        var smooth = !TryReleaseFlick(ref offset);
 
         // get the flick-adjusted endpoint
         var pe = p1 + offset * mFlickWindup;
 
-        // move the hitbox
+        // move to the new positions
+        MoveTo(p0, p1, pe, animated: smooth);
+
+        // raise move pitch based on offset
+        mFootsteps.SetPitch(1.0f + offset.magnitude * mFlickPitch);
+    }
+
+    /// move player to the position, animated if necessary
+    void MoveTo(Vector2 p0, Vector2 p1, Vector2 pe, bool animated) {
+        if (animated) {
+            StartCoroutine(MoveToAnimated(p0, p1, pe));
+        } else {
+            MoveTo(p0, p1, pe);
+        }
+    }
+
+    /// move player to the position
+    void MoveTo(Vector2 p0, Vector2 p1, Vector2 pe) {
+        // move hitbox
         mHitbox.Position = pe;
 
-        // render shapes
+        // move actual line
         mLine.Start = p0;
         mLine.End = pe;
         mHand.localPosition = pe;
 
+        // move ghost trail
         mTrail.Start = p1;
         mTrail.End = pe;
         mGhost.localPosition = p1;
     }
 
+    /// animate player to the position
+    IEnumerator MoveToAnimated(Vector2 p0, Vector2 p1, Vector2 pe) {
+        // acc time each frame
+        var time = 0.0f;
+        var duration = mAnimDuration;
+
+        // given the initial position
+        var p10 = mTrail.Start;
+        var pe0 = mLine.End;
+
+        // until the animation finishes
+        while (time < duration) {
+            // lerp the moving points
+            var pct = time / duration;
+            var p11 = Vector2.Lerp(p10, p1, pct);
+            var pe1 = Vector2.Lerp(pe0, pe, pct);
+
+            // and update player's position
+            MoveTo(p0, p11, pe1);
+
+            // wait a frame
+            time += Time.deltaTime;
+            yield return null;
+        }
+
+        // end in the final position
+        MoveTo(p0, p1, pe);
+    }
+
     /// release the flick, if necessary, modifying the offset
-    void TryReleaseFlick(ref Vector2 offset) {
+    bool TryReleaseFlick(ref Vector2 offset) {
         if (mFlickRelease == null) {
-            return;
+            return false;
         }
 
         // check elapsed time
@@ -297,19 +342,21 @@ public class Player: MonoBehaviour {
         // if the release finished, clear it
         if (percent >= 1.0f) {
             mFlickRelease = null;
+            return false;
         }
+
         // otherwise, use the release offset instead
-        else {
-            var curved = mReleaseCurve.Evaluate(percent);
-            if (curved > 1.0f) {
-                curved = 1.0f + (curved - 1.0f) * release.Strength;
-            }
-
-            offset = Vector2.LerpUnclamped(release.Initial, Vector2.zero, curved);
-
-            // move release to offset to calc speed
-            release.MoveTo(offset, Time.fixedDeltaTime);
+        var curved = mReleaseCurve.Evaluate(percent);
+        if (curved > 1.0f) {
+            curved = 1.0f + (curved - 1.0f) * release.Strength;
         }
+
+        offset = Vector2.LerpUnclamped(release.Initial, Vector2.zero, curved);
+
+        // move release to offset to calc speed
+        release.MoveTo(offset, Time.fixedDeltaTime);
+
+        return true;
     }
 
     // -- queries --
