@@ -1,3 +1,3 @@
-# unknown
+# stick game
 
-who knows?
+vibing/fighting as a stick in a box
