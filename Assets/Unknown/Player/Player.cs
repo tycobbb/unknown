@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -17,21 +16,6 @@ public class Player: MonoBehaviour {
 
     [Tooltip("the move speed, degrees for a full rotation")]
     [SerializeField] float mMoveSpeed = 720.0f;
-
-    [Tooltip("the max length of the flick windup")]
-    [SerializeField] float mFlickWindup = 0.1f;
-
-    [Tooltip("the max pitch shift of the flick windup")]
-    [SerializeField] float mFlickPitch = 0.3f;
-
-    [Tooltip("the curve for the flick release")]
-    [SerializeField] AnimationCurve mReleaseCurve;
-
-    [Tooltip("the duration for the flick release")]
-    [SerializeField] float mReleaseDuration = 0.1f;
-
-    [Tooltip("the min alignment to detect a flick release")]
-    [SerializeField] float mReleaseAlignment = 0.1f;
 
     [Tooltip("the duration to smooth movements")]
     [SerializeField] float mAnimDuration = 0.1f;
@@ -58,6 +42,9 @@ public class Player: MonoBehaviour {
     [SerializeField] Musicker mFootsteps;
 
     [Tooltip("the input system input")]
+    [SerializeField] PlayerFlick mFlick;
+
+    [Tooltip("the input system input")]
     [SerializeField] PlayerInput mInput;
 
     // -- props --
@@ -78,12 +65,6 @@ public class Player: MonoBehaviour {
 
     /// the accumulated move angle
     float mMoveAngle;
-
-    /// the flick windup offset
-    Vector2 mFlickOffset;
-
-    /// the release gesture
-    FlickRelease mFlickRelease;
 
     /// the pattern's anchor index
     Draft<int> mAnchorIndex = new Draft<int>(-1);
@@ -141,9 +122,8 @@ public class Player: MonoBehaviour {
     }
 
     void Update() {
-        // update state from input
+        // read input
         ReadMove();
-        ReadFlick();
     }
 
     void FixedUpdate() {
@@ -211,7 +191,7 @@ public class Player: MonoBehaviour {
             );
         }
 
-        // apply as a percentage to pattern, down is 0%/100%
+        // apply angle to pattern (down is 0%/100%)
         mPattern.MoveTo(mMoveAngle / mMoveSpeed);
 
         // play footsteps when moving
@@ -227,90 +207,22 @@ public class Player: MonoBehaviour {
             mVoice.PlayTone(mVoiceLine[i], mKey);
         }
     }
-
-    /// read flick offset
-    void ReadFlick() {
-        // capture prev and next offset
-        var prev = mFlickOffset;
-        var next = mActions.Flick;
-
-        // update state
-        mFlickOffset = next;
-
-        // read a release gesture
-        ReadFlickRelease(prev, next);
-    }
-
-    /// read release gesture given prev and next offset
-    void ReadFlickRelease(Vector2 prev, Vector2 next) {
-        // unless the release if frame locked
-        var release = mFlickRelease;
-        if (release?.IsLocked == true) {
-            return;
-        }
-
-        // check alignment between previous dir and movement dir
-        var delta = next - prev;
-        var align = Vector2.Dot(prev.normalized, delta.normalized);
-
-        // if it flipped (dot is ~ -1.0f), this is a release
-        if (Mathf.Abs(align + 1.0f) < mReleaseAlignment) {
-            if (release == null) {
-                release = mFlickRelease = new FlickRelease(Time.time, prev);
-            }
-
-            release.BufferStrength(delta.magnitude);
-        }
-    }
-
     /// move line into position
     void Move() {
+        // try to release the flick
+        mFlick.TryRelease();
+
         // get pattern pos
         var p0 = mPattern.Point0;
         var p1 = mPattern.Point1;
-
-        // get flick offset, releasing flick if necessary
-        var offset = mFlickOffset;
-        var smooth = !TryReleaseFlick(ref offset);
-
-        // get the flick-adjusted endpoint
-        var pe = p1 + offset * mFlickWindup;
+        var pe = p1 + mFlick.Offset;
 
         // move to the new positions
-        MoveTo(p0, p1, pe, animated: smooth && !mIsFirstFrame);
+        MoveTo(p0, p1, pe, animated: !mIsFirstFrame);
         mIsFirstFrame = false;
 
         // raise move pitch based on offset
-        mFootsteps.SetPitch(1.0f + offset.magnitude * mFlickPitch);
-    }
-
-    /// release the flick, if necessary, modifying the offset
-    bool TryReleaseFlick(ref Vector2 offset) {
-        if (mFlickRelease == null) {
-            return false;
-        }
-
-        // check elapsed time
-        var release = mFlickRelease;
-        var percent = release.Elapsed(Time.time) / mReleaseDuration;
-
-        // if the release finished, clear it
-        if (percent >= 1.0f) {
-            mFlickRelease = null;
-            return false;
-        }
-
-        // otherwise, use the release offset instead
-        var curved = mReleaseCurve.Evaluate(percent);
-        if (curved > 1.0f) {
-            curved = 1.0f + (curved - 1.0f) * release.Strength;
-        }
-
-        // move release to offset to calc speed
-        release.MoveTo(curved, Time.fixedDeltaTime);
-        offset = release.Offset;
-
-        return true;
+        mFootsteps.SetPitch(1.0f + mFlick.PitchShift);
     }
 
     /// move player to the position, animated if necessary
@@ -375,14 +287,7 @@ public class Player: MonoBehaviour {
 
     /// if this player is releasing
     bool IsReleasing {
-       get => mFlickRelease != null;
-    }
-
-    /// get rgb color from hsv
-    Color FromHsv(float h, float s, float v, float a = 1.0f) {
-        var c = Color.HSVToRGB(Mathf.Repeat(h, 1.0f), s, v);
-        c.a = a;
-        return c;
+        get => mFlick.IsReleasing;
     }
 
     // -- events --
@@ -395,80 +300,17 @@ public class Player: MonoBehaviour {
         }
 
         // record the hit
-        if (mFlickRelease != null) {
-            mScore.RecordHit(mConfig, mFlickRelease.Speed);
+        if (IsReleasing) {
+            mScore.RecordHit(mConfig, mFlick.Speed);
         }
     }
 
-    // -- gestures --
-    /// the flick release gesture initial state
-    sealed class FlickRelease {
-        // -- props --
-        /// the time on release
-        float mTime;
-
-        /// the frame of this release
-        int mFrame;
-
-        /// the initial flick offset
-        Vector2 mInitial;
-
-        /// the strength of the flick
-        float mStrength;
-
-        /// the current flick offset
-        Vector2 mCurrent;
-
-        /// the current flick speed
-        float mSpeed;
-
-        // -- lifetime --
-        /// create a new gesture
-        public FlickRelease(float time, Vector2 initial) {
-            mTime = time;
-            mInitial = initial;
-        }
-
-        // -- commands --
-        /// move release to percent complete and calculate speed
-        public void MoveTo(float pct, float deltaTime) {
-            var prev = mCurrent;
-            var next = Vector2.LerpUnclamped(mInitial, Vector2.zero, pct);
-
-            mSpeed = Vector2.Distance(prev, next) / deltaTime;
-            mCurrent = next;
-        }
-
-        /// accumulate strength over a few frames
-        public void BufferStrength(float strength) {
-            mStrength = Mathf.Max(mStrength, strength);
-            mFrame++;
-        }
-
-        // -- queries --
-        /// the strength
-        public float Strength {
-            get => mStrength;
-        }
-
-        /// the current release speed
-        public float Speed {
-            get => mSpeed;
-        }
-
-        /// the current offset
-        public Vector2 Offset {
-            get => mCurrent;
-        }
-
-        /// if the release gesture is frame locked
-        public bool IsLocked {
-            get => mFrame > 1;
-        }
-
-        /// find the elapsed time
-        public float Elapsed(float time) {
-            return time - mTime;
-        }
+    // -- utils --
+    /// get rgb color from hsv
+    Color FromHsv(float h, float s, float v, float a = 1.0f) {
+        var c = Color.HSVToRGB(Mathf.Repeat(h, 1.0f), s, v);
+        c.a = a;
+        return c;
     }
+
 }
