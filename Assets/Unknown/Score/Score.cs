@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -78,7 +77,6 @@ public class Score: MonoBehaviour {
     /// record a hit
     public void RecordHit(PlayerConfig cfg, float speed) {
         var rec = mRecords[cfg.Index];
-        rec.HitSpeed += 999.0f;
 
         // record finish if already reached max
         if (!rec.FinalHit && CalcScore(rec) >= cMaxScore) {
