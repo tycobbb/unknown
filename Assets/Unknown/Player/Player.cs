@@ -64,6 +64,9 @@ public class Player: MonoBehaviour {
     /// the player's config
     PlayerConfig mConfig;
 
+    /// if this is the first frame
+    bool mIsFirstFrame = true;
+
     /// the musical key
     Key mKey;
 
@@ -269,10 +272,41 @@ public class Player: MonoBehaviour {
         var pe = p1 + offset * mFlickWindup;
 
         // move to the new positions
-        MoveTo(p0, p1, pe, animated: smooth);
+        MoveTo(p0, p1, pe, animated: smooth && !mIsFirstFrame);
+        mIsFirstFrame = false;
 
         // raise move pitch based on offset
         mFootsteps.SetPitch(1.0f + offset.magnitude * mFlickPitch);
+    }
+
+    /// release the flick, if necessary, modifying the offset
+    bool TryReleaseFlick(ref Vector2 offset) {
+        if (mFlickRelease == null) {
+            return false;
+        }
+
+        // check elapsed time
+        var release = mFlickRelease;
+        var percent = (Time.time - release.Time) / mReleaseDuration;
+
+        // if the release finished, clear it
+        if (percent >= 1.0f) {
+            mFlickRelease = null;
+            return false;
+        }
+
+        // otherwise, use the release offset instead
+        var curved = mReleaseCurve.Evaluate(percent);
+        if (curved > 1.0f) {
+            curved = 1.0f + (curved - 1.0f) * release.Strength;
+        }
+
+        offset = Vector2.LerpUnclamped(release.Initial, Vector2.zero, curved);
+
+        // move release to offset to calc speed
+        release.MoveTo(offset, Time.fixedDeltaTime);
+
+        return true;
     }
 
     /// move player to the position, animated if necessary
@@ -327,36 +361,6 @@ public class Player: MonoBehaviour {
 
         // end in the final position
         MoveTo(p0, p1, pe);
-    }
-
-    /// release the flick, if necessary, modifying the offset
-    bool TryReleaseFlick(ref Vector2 offset) {
-        if (mFlickRelease == null) {
-            return false;
-        }
-
-        // check elapsed time
-        var release = mFlickRelease;
-        var percent = (Time.time - release.Time) / mReleaseDuration;
-
-        // if the release finished, clear it
-        if (percent >= 1.0f) {
-            mFlickRelease = null;
-            return false;
-        }
-
-        // otherwise, use the release offset instead
-        var curved = mReleaseCurve.Evaluate(percent);
-        if (curved > 1.0f) {
-            curved = 1.0f + (curved - 1.0f) * release.Strength;
-        }
-
-        offset = Vector2.LerpUnclamped(release.Initial, Vector2.zero, curved);
-
-        // move release to offset to calc speed
-        release.MoveTo(offset, Time.fixedDeltaTime);
-
-        return true;
     }
 
     // -- queries --
