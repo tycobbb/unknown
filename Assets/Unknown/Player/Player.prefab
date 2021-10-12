@@ -315,7 +315,7 @@ MonoBehaviour:
   mHitbox:
     Position: {x: 0, y: 0}
     Radius: 0.025
-  mMoveSpeed: 3600
+  mMoveSpeed: 1440
   mFlickWindup: 0.2
   mFlickPitch: 0.33333334
   mReleaseCurve:
