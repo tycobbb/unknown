@@ -160,6 +160,7 @@ public class Player: MonoBehaviour {
         Debug.Log($"{name} joined");
     }
 
+    /// apply player config
     void Configure() {
         var cfg = mConfig;
 
@@ -236,25 +237,29 @@ public class Player: MonoBehaviour {
         // update state
         mFlickOffset = next;
 
-        // if there is no active release, check for one
-        if (mFlickRelease == null) {
-            ReadFlickRelease(prev, next);
-        }
+        // read a release gesture
+        ReadFlickRelease(prev, next);
     }
 
     /// read release gesture given prev and next offset
     void ReadFlickRelease(Vector2 prev, Vector2 next) {
-        // check alignment between previous direction and movement direction
+        // unless the release if frame locked
+        var release = mFlickRelease;
+        if (release?.IsLocked == true) {
+            return;
+        }
+
+        // check alignment between previous dir and movement dir
         var delta = next - prev;
         var align = Vector2.Dot(prev.normalized, delta.normalized);
 
         // if it flipped (dot is ~ -1.0f), this is a release
         if (Mathf.Abs(align + 1.0f) < mReleaseAlignment) {
-            mFlickRelease = new FlickRelease(
-                time: Time.time,
-                strength: delta.magnitude,
-                initial: prev
-            );
+            if (release == null) {
+                release = mFlickRelease = new FlickRelease(Time.time, prev);
+            }
+
+            release.BufferStrength(delta.magnitude);
         }
     }
 
@@ -287,7 +292,7 @@ public class Player: MonoBehaviour {
 
         // check elapsed time
         var release = mFlickRelease;
-        var percent = (Time.time - release.Time) / mReleaseDuration;
+        var percent = release.Elapsed(Time.time) / mReleaseDuration;
 
         // if the release finished, clear it
         if (percent >= 1.0f) {
@@ -301,10 +306,9 @@ public class Player: MonoBehaviour {
             curved = 1.0f + (curved - 1.0f) * release.Strength;
         }
 
-        offset = Vector2.LerpUnclamped(release.Initial, Vector2.zero, curved);
-
         // move release to offset to calc speed
-        release.MoveTo(offset, Time.fixedDeltaTime);
+        release.MoveTo(curved, Time.fixedDeltaTime);
+        offset = release.Offset;
 
         return true;
     }
@@ -398,38 +402,73 @@ public class Player: MonoBehaviour {
 
     // -- gestures --
     /// the flick release gesture initial state
-    public sealed class FlickRelease {
+    sealed class FlickRelease {
+        // -- props --
         /// the time on release
-        public readonly float Time;
+        float mTime;
 
-        /// the strength of the flick
-        public readonly float Strength;
+        /// the frame of this release
+        int mFrame;
 
         /// the initial flick offset
-        public readonly Vector2 Initial;
+        Vector2 mInitial;
+
+        /// the strength of the flick
+        float mStrength;
 
         /// the current flick offset
-        public Vector2 Current { get; private set;  }
+        Vector2 mCurrent;
 
         /// the current flick speed
-        public float Speed { get; private set; }
+        float mSpeed;
 
         // -- lifetime --
         /// create a new gesture
-        public FlickRelease(float time, float strength, Vector2 initial) {
-            Time = time;
-            Strength = strength;
-            Initial = initial;
+        public FlickRelease(float time, Vector2 initial) {
+            mTime = time;
+            mInitial = initial;
         }
 
         // -- commands --
-        /// move flick to offset and calculate speed
-        public void MoveTo(Vector2 offset, float deltaTime) {
-            var prev = Current;
-            var next = offset;
+        /// move release to percent complete and calculate speed
+        public void MoveTo(float pct, float deltaTime) {
+            var prev = mCurrent;
+            var next = Vector2.LerpUnclamped(mInitial, Vector2.zero, pct);
 
-            Current = next;
-            Speed = Vector2.Distance(prev, next) / deltaTime;
+            mSpeed = Vector2.Distance(prev, next) / deltaTime;
+            mCurrent = next;
+        }
+
+        /// accumulate strength over a few frames
+        public void BufferStrength(float strength) {
+            mStrength = Mathf.Max(mStrength, strength);
+            mFrame++;
+        }
+
+        // -- queries --
+        /// the strength
+        public float Strength {
+            get => mStrength;
+        }
+
+        /// the current release speed
+        public float Speed {
+            get => mSpeed;
+        }
+
+        /// the current offset
+        public Vector2 Offset {
+            get => mCurrent;
+        }
+
+        /// if the release gesture is frame locked
+        public bool IsLocked {
+            get => mFrame > 1;
+        }
+
+        /// find the elapsed time
+        public float Elapsed(float time) {
+            return time - mTime;
         }
     }
 }
