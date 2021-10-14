@@ -1,6 +1,4 @@
 using System;
-// ReSharper disable once RedundantUsingDirective
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -8,6 +6,7 @@ using UnityEngine.Serialization;
 /// the score ui label
 public class Score: MonoBehaviour {
     // -- constants --
+    /// the winning score
     const float cMaxScore = 42.0f;
 
     // -- module --
@@ -43,19 +42,6 @@ public class Score: MonoBehaviour {
     PlayerRecord[] mRecords = new PlayerRecord[2];
 
     // -- lifecycle --
-    void Awake() {
-        #if !UNITY_EDITOR && UNITY_WEBGL
-        var labels = new List<TMP_Text>();
-        labels.Add(mTimerLabel);
-        labels.AddRange(mFinishTimeLabels);
-        labels.AddRange(mScoreLabels);
-
-        foreach (var label in labels) {
-            label.fontSize *= 2.5f;
-        }
-        #endif
-    }
-
     void FixedUpdate() {
         SyncTimer();
     }
@@ -65,8 +51,12 @@ public class Score: MonoBehaviour {
     public void AddPlayer(PlayerConfig cfg) {
         // add player
         var i = cfg.Index;
-        mScoreLabels[i].color = cfg.Color;
         mRecords[i] = new PlayerRecord();
+
+        // show score label
+        var label = mScoreLabels[i];
+        label.color = cfg.Color;
+        label.enabled = true;
 
         // start timer once second player joins
         if (i >= 1) {
@@ -82,6 +72,7 @@ public class Score: MonoBehaviour {
     void RecordStart() {
         mElapsed = 0.0f;
         mTimerLabel.color = Color.white;
+        mTimerLabel.enabled = true;
     }
 
     /// record a hit
@@ -125,11 +116,11 @@ public class Score: MonoBehaviour {
         // find next label
         var label = null as TMP_Text;
         foreach (var l in mFinishTimeLabels) {
-            if (l.color.a != 0.0f) {
+            if (l.enabled) {
                 continue;
             }
 
-            if (label == null || l.transform.position.y > label.transform.position.y) {
+            if (label == null || l.transform.position.y < label.transform.position.y) {
                 label = l;
             }
         }
@@ -143,6 +134,7 @@ public class Score: MonoBehaviour {
         var c = Color.white;
         c.a = 0.5f;
         label.color = c;
+        label.enabled = true;
 
         // with the time
         label.text = TimeToString(rec.FinishTime.Value);
