@@ -1,5 +1,9 @@
 # assets
-Assets/Shapes
+Assets/Plugins/Shapes
+Assets/Plugins/Demigiant/DOTween
+Assets/Plugins/TextMesh Pro
+
+# screenshots
 Screens
 
 # This .gitignore file should be placed at the root of your Unity project directory
