@@ -40,6 +40,11 @@ public struct Pattern {
     }
 
     // -- queries --
+    /// the current percent
+    public float Percent {
+        get => mPercent;
+    }
+
     /// the current anchor index
     public int AnchorIndex {
         get => Mathf.Min(Mathf.FloorToInt(mPercent / 0.25f), 3);

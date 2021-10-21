@@ -316,71 +316,7 @@ MonoBehaviour:
   mHitbox:
     Position: {x: 0, y: 0}
     Radius: 0.025
-  mMoveSpeed: 1440
-  mFlickWindup: 0.2
-  mFlickPitch: 0.33333334
-  mReleaseCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0.52527356
-      outSlope: 0.52527356
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0.5915025
-    - serializedVersion: 3
-      time: 0.30302247
-      value: 3.0083725
-      inSlope: 0.167677
-      outSlope: 0.167677
-      tangentMode: 0
-      weightedMode: 3
-      inWeight: 0.49708164
-      outWeight: 0.36516073
-    - serializedVersion: 3
-      time: 0.7394721
-      value: 0.7720532
-      inSlope: 0.0042931978
-      outSlope: 0.0042931978
-      tangentMode: 0
-      weightedMode: 3
-      inWeight: 0.24706402
-      outWeight: 0.49020094
-    - serializedVersion: 3
-      time: 0.8470047
-      value: 1.1124381
-      inSlope: 0.82343036
-      outSlope: 0.82343036
-      tangentMode: 0
-      weightedMode: 3
-      inWeight: 0.31478858
-      outWeight: 0.24964754
-    - serializedVersion: 3
-      time: 0.93562216
-      value: 0.89562935
-      inSlope: -0.2746709
-      outSlope: -0.2746709
-      tangentMode: 0
-      weightedMode: 3
-      inWeight: 0.2833197
-      outWeight: 0.33144742
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 1
-      inWeight: 0.7849573
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  mReleaseDuration: 0.5
-  mReleaseAlignment: 0.1
+  mMoveSpeed: 0.1
   mAnimDuration: 0.05
   mLine: {fileID: 3898287554920713603}
   mHand: {fileID: 6117586667251438520}
@@ -402,8 +338,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f90a6ffdeb9b4c61acb445db1ccee363, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mFlickWindup: 0.2
-  mFlickPitch: 0.33333334
+  mScale: 0.2
+  mPitchScale: 0.33333334
   mReleaseCurve:
     serializedVersion: 2
     m_Curve:

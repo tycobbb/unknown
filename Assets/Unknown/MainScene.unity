@@ -418,6 +418,22 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 133148305, guid: 4d1857a162d284fed8ee58a258f631de, type: 3}
+      propertyPath: m_JoinBehavior
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 133148305, guid: 4d1857a162d284fed8ee58a258f631de, type: 3}
+      propertyPath: m_MaxPlayerCount
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 133148305, guid: 4d1857a162d284fed8ee58a258f631de, type: 3}
+      propertyPath: m_JoinAction.m_Reference
+      value: 
+      objectReference: {fileID: 1430484487460387676, guid: bc70d07c77ce64ea68e5c2888d3f8d63, type: 3}
+    - target: {fileID: 133148305, guid: 4d1857a162d284fed8ee58a258f631de, type: 3}
+      propertyPath: m_JoinAction.m_UseReference
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1010824611441724976, guid: 4d1857a162d284fed8ee58a258f631de, type: 3}
       propertyPath: mPlayerConfigs.Array.data[0].VoiceInstrument
       value: 
@@ -747,6 +763,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3340831820912898581, guid: 3f81bdc46697e43d3bee5b29f7f88f00, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -390.00006
+      objectReference: {fileID: 0}
     - target: {fileID: 3860679344482936561, guid: 3f81bdc46697e43d3bee5b29f7f88f00, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -806,6 +826,10 @@ PrefabInstance:
     - target: {fileID: 3860679345362916863, guid: 3f81bdc46697e43d3bee5b29f7f88f00, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7924589835057389964, guid: 3f81bdc46697e43d3bee5b29f7f88f00, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -390.00006
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3f81bdc46697e43d3bee5b29f7f88f00, type: 3}

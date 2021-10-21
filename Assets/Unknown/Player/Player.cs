@@ -14,11 +14,8 @@ public class Player: MonoBehaviour {
     [Tooltip("the hitbox at the end of the line")]
     [SerializeField] PlayerHitbox mHitbox;
 
-    [Tooltip("the move speed, degrees for a full rotation")]
-    [SerializeField] float mMoveSpeed = 720.0f;
-
-    [Tooltip("the duration to smooth movements")]
-    [SerializeField] float mAnimDuration = 0.1f;
+    [Tooltip("the move speed in percent per second")]
+    [SerializeField] float mMoveSpeed = 0.5f;
 
     // -- nodes --
     [Header("nodes")]
@@ -60,11 +57,8 @@ public class Player: MonoBehaviour {
     /// the line pattern
     Pattern mPattern;
 
-    /// the current move dir
-    Vector2 mMoveDir;
-
-    /// the accumulated move angle
-    float mMoveAngle;
+    /// the destination move angle [0...1]
+    float mPercentDest;
 
     /// the pattern's anchor index
     Draft<int> mAnchorIndex = new Draft<int>(-1);
@@ -169,7 +163,7 @@ public class Player: MonoBehaviour {
         mFootsteps.Instrument = cfg.FootstepsInstrument;
 
         // set initial position
-        mMoveAngle = mMoveSpeed * cfg.Percent;
+        mPattern.MoveTo(cfg.Percent);
 
         // show score
         mScore.AddPlayer(cfg);
@@ -177,38 +171,32 @@ public class Player: MonoBehaviour {
 
     /// read move pattern
     void ReadMove() {
-        var nDir = mActions.Move;
-        var pDir = mMoveDir;
+        var mDir = mActions.Move;
 
-        // update move dir
-        mMoveDir = nDir;
+        // map the analog stick position to the pattern [0,1]
+        if (mDir != Vector2.zero) {
+            var angle = Vector2.SignedAngle(Vector2.down, mDir);
+            if (angle < 0.0) {
+                angle = Mathf.Abs(angle);
+            } else {
+                angle = 360.0f - angle;
+            }
 
-        // add the angle between prev and next to the move angle
-        if (pDir != Vector2.zero) {
-            mMoveAngle = Mathf.Repeat(
-                mMoveAngle + Vector2.SignedAngle(pDir, nDir),
-                mMoveSpeed
-            );
+            mPercentDest = angle / 360.0f;
         }
 
-        // apply angle to pattern (down is 0%/100%)
-        mPattern.MoveTo(mMoveAngle / mMoveSpeed);
-
         // play footsteps when moving
-        var isMoving = nDir != Vector2.zero;
+        var isMoving = mDir != Vector2.zero;
         if (isMoving != mFootsteps.IsPlayingLoop) {
             mFootsteps.ToggleLoop(mFootstepsLoop, isMoving, mKey);
         }
-
-        // play voice when anchor changes
-        var i = mPattern.AnchorIndex;
-        mAnchorIndex.Val = i;
-        if (mAnchorIndex.IsDirty) {
-            mVoice.PlayTone(mVoiceLine[i], mKey);
-        }
     }
+
     /// move line into position
     void Move() {
+        // move the pattern
+        MovePattern();
+
         // try to release the flick
         mFlick.TryRelease();
 
@@ -218,24 +206,53 @@ public class Player: MonoBehaviour {
         var pe = p1 + mFlick.Offset;
 
         // move to the new positions
-        MoveTo(p0, p1, pe, animated: !mIsFirstFrame);
+        SyncPosition(p0, p1, pe);
         mIsFirstFrame = false;
 
         // raise move pitch based on offset
         mFootsteps.SetPitch(1.0f + mFlick.PitchShift);
     }
 
-    /// move player to the position, animated if necessary
-    void MoveTo(Vector2 p0, Vector2 p1, Vector2 pe, bool animated) {
-        if (animated) {
-            StartCoroutine(MoveToAnimated(p0, p1, pe));
-        } else {
-            MoveTo(p0, p1, pe);
+    void MovePattern() {
+        // check the distance to our destination
+        var pct0 = mPattern.Percent;
+        var pct1 = mPercentDest;
+        var dist = pct1 - pct0;
+
+        // if there is anywhere to move
+        if (dist == 0.0f) {
+            return;
+        }
+
+        // find the dir to destination
+        var dDir = Mathf.Sign(dist);
+
+        // but move in the shortest path
+        var mDir = dDir;
+        if (Mathf.Abs(dist) > 0.5f) {
+            mDir = -mDir;
+        }
+
+        // lerp the angle into the pattern
+        var pcti = pct0 + mMoveSpeed * Time.deltaTime * mDir;
+
+        // if we overshot, snap to target
+        if (Mathf.Sign(pct1 - pcti) != dDir) {
+            pcti = pct1;
+        }
+
+        mPattern.MoveTo(pcti);
+
+        // play voice when anchor changes
+        var i = mPattern.AnchorIndex;
+        mAnchorIndex.Val = i;
+        if (mAnchorIndex.IsDirty) {
+            mVoice.PlayTone(mVoiceLine[i], mKey);
         }
     }
 
-    /// move player to the position
-    void MoveTo(Vector2 p0, Vector2 p1, Vector2 pe) {
+    /// sync player position
+    void SyncPosition(Vector2 p0, Vector2 p1, Vector2 pe) {
         // move hitbox
         mHitbox.Position = pe;
 
@@ -248,35 +265,6 @@ public class Player: MonoBehaviour {
         mTrail.Start = p1;
         mTrail.End = pe;
         mGhost.localPosition = p1;
-    }
-
-    /// animate player to the position
-    IEnumerator MoveToAnimated(Vector2 p0, Vector2 p1, Vector2 pe) {
-        // acc time each frame
-        var time = 0.0f;
-        var duration = mAnimDuration;
-
-        // given the initial position
-        var p10 = mTrail.Start;
-        var pe0 = mLine.End;
-
-        // until the animation finishes
-        while (time < duration) {
-            // lerp the moving points
-            var pct = time / duration;
-            var p11 = Vector2.Lerp(p10, p1, pct);
-            var pe1 = Vector2.Lerp(pe0, pe, pct);
-
-            // and update player's position
-            MoveTo(p0, p11, pe1);
-
-            // wait a frame
-            time += Time.deltaTime;
-            yield return null;
-        }
-
-        // end in the final position
-        MoveTo(p0, p1, pe);
     }
 
     // -- queries --
@@ -312,5 +300,4 @@ public class Player: MonoBehaviour {
         c.a = a;
         return c;
     }
-
 }
