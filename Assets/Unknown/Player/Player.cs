@@ -46,9 +46,6 @@ public class Player: MonoBehaviour {
     /// the player's config
     PlayerConfig m_Config;
 
-    /// if this is the first frame
-    bool m_IsFirstFrame = true;
-
     /// the musical key
     Key m_Key;
 
@@ -171,8 +168,12 @@ public class Player: MonoBehaviour {
     void ReadMove() {
         var mDir = m_Actions.Move;
 
-        // map the analog stick position to the pattern [0,1]
-        if (mDir != Vector2.zero) {
+        // if neutral, stop moving
+        if (mDir == Vector2.zero) {
+            m_PercentDest = m_Pattern.Percent;
+        }
+        // or, map the analog stick position to the pattern [0,1]
+        else {
             var angle = Vector2.SignedAngle(Vector2.down, mDir);
             if (angle < 0.0) {
                 angle = Mathf.Abs(angle);
@@ -205,7 +206,6 @@ public class Player: MonoBehaviour {
 
         // move to the new positions
         SyncPosition(p0, p1, pe);
-        m_IsFirstFrame = false;
 
         // raise move pitch based on offset
         m_Footsteps.SetPitch(1.0f + m_Flick.PitchShift);

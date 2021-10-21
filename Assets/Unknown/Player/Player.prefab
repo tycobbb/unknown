@@ -313,19 +313,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe9cbee98a5404ec997d2a16a7b550f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mHitbox:
+  m_Hitbox:
     Position: {x: 0, y: 0}
     Radius: 0.025
-  mMoveSpeed: 0.1
-  mAnimDuration: 0.05
-  mLine: {fileID: 3898287554920713603}
-  mHand: {fileID: 6117586667251438520}
-  mTrail: {fileID: 2980957337658543330}
-  mGhost: {fileID: 7872479324776051326}
-  mVoice: {fileID: 7025300543588707201}
-  mFootsteps: {fileID: 5438007216668105070}
-  mFlick: {fileID: 8712634408959464779}
-  mInput: {fileID: 408289371547382750}
+  m_MoveSpeed: 0.4
+  m_Line: {fileID: 3898287554920713603}
+  m_Hand: {fileID: 6117586667251438520}
+  m_Trail: {fileID: 2980957337658543330}
+  m_Ghost: {fileID: 7872479324776051326}
+  m_Voice: {fileID: 7025300543588707201}
+  m_Footsteps: {fileID: 5438007216668105070}
+  m_Flick: {fileID: 8712634408959464779}
+  m_Input: {fileID: 408289371547382750}
 --- !u!114 &8712634408959464779
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -338,9 +337,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f90a6ffdeb9b4c61acb445db1ccee363, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mScale: 0.2
-  mPitchScale: 0.33333334
-  mReleaseCurve:
+  m_Scale: 0.2
+  m_PitchScale: 0.33333334
+  m_ReleaseCurve:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
@@ -400,9 +399,9 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  mReleaseDuration: 0.5
-  mReleaseAlignment: 0.1
-  mInput: {fileID: 408289371547382750}
+  m_ReleaseDuration: 0.5
+  m_ReleaseAlignment: 0.1
+  m_Input: {fileID: 408289371547382750}
 --- !u!114 &7025300543588707201
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -415,9 +414,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca8ed092cd6654f1c9575cc95fbe061c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mNumSources: 1
-  mSources: []
-  mInstrument: {fileID: 0}
+  m_NumSources: 1
+  m_Sources: []
+  m_Instrument: {fileID: 0}
 --- !u!114 &5438007216668105070
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -430,9 +429,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca8ed092cd6654f1c9575cc95fbe061c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mNumSources: 2
-  mSources: []
-  mInstrument: {fileID: 0}
+  m_NumSources: 2
+  m_Sources: []
+  m_Instrument: {fileID: 0}
 --- !u!114 &408289371547382750
 MonoBehaviour:
   m_ObjectHideFlags: 0
