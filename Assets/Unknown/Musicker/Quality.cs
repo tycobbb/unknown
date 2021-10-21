@@ -2,23 +2,23 @@
 public readonly struct Quality {
     // -- props --
     /// the tones in this quality
-    readonly Tone[] mTones;
+    readonly Tone[] m_Tones;
 
     // -- lifetime --
     /// create a quality w/ the tones
     public Quality(params Tone[] tones) {
-        mTones = tones;
+        m_Tones = tones;
     }
 
     // -- queries --
     /// the number of tones in he quality
     public int Length {
-        get => mTones.Length;
+        get => m_Tones.Length;
     }
 
     /// the tone at the position
     public Tone this[int i] {
-        get => mTones[i];
+        get => m_Tones[i];
     }
 
     // -- factories --

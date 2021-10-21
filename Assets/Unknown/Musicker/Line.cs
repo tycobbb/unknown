@@ -2,33 +2,33 @@
 public sealed class Line {
     // -- props --
     /// the index of the current tone
-    int mCurr;
+    int m_Curr;
 
     /// the tones in this progression
-    readonly Tone[] mTones;
+    readonly Tone[] m_Tones;
 
     // -- lifetime --
     /// create a new line
     public Line(params Tone[] tones) {
-        mCurr = 0;
-        mTones = tones;
+        m_Curr = 0;
+        m_Tones = tones;
     }
 
     // -- commands --
     /// move to the next tone
     public void Advance() {
-        var next = mCurr + 1;
-        mCurr = next % mTones.Length;
+        var next = m_Curr + 1;
+        m_Curr = next % m_Tones.Length;
     }
 
     // -- queries --
     /// the current tone
     public Tone Curr() {
-        return mTones[mCurr];
+        return m_Tones[m_Curr];
     }
 
     /// the tone at the position
     public Tone this[int i] {
-        get => mTones[i];
+        get => m_Tones[i];
     }
 }

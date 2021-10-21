@@ -1,23 +1,24 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 
 /// the game
 public class Game: MonoBehaviour {
     // -- config --
     [Header("config")]
     [Tooltip("the configs for each player")]
-    [SerializeField] PlayerConfig[] mPlayerConfigs;
+    [SerializeField] PlayerConfig[] m_PlayerConfigs;
 
     // -- props --
     /// the current player count
-    int mNumPlayers = 0;
+    int m_NumPlayers = 0;
 
     /// the array of players
-    Player[] mPlayers = new Player[2];
+    Player[] m_Players = new Player[2];
 
     /// if the players are colliding
-    bool mIsColliding = false;
+    bool m_IsColliding = false;
 
     // -- lifecycle --
     void FixedUpdate() {
@@ -27,28 +28,28 @@ public class Game: MonoBehaviour {
     // -- commands --
     /// add a new player to the game
     void AddPlayer(Player player) {
-        var i = mNumPlayers;
+        var i = m_NumPlayers;
 
         // prepare player
-        player.Join(mPlayerConfigs[i]);
+        player.Join(m_PlayerConfigs[i]);
 
         // add to game
-        mPlayers[i] = player;
-        mNumPlayers++;
+        m_Players[i] = player;
+        m_NumPlayers++;
     }
 
     /// collide the players together if necessary
     void TryCollide() {
-        if (mNumPlayers != 2) {
+        if (m_NumPlayers != 2) {
             return;
         }
 
-        var player1 = mPlayers[0];
-        var player2 = mPlayers[1];
+        var player1 = m_Players[0];
+        var player2 = m_Players[1];
 
         // if the collision state changed
         var isColliding = player1.Overlaps(player2);
-        if (mIsColliding == isColliding) {
+        if (m_IsColliding == isColliding) {
             return;
         }
 
@@ -59,7 +60,7 @@ public class Game: MonoBehaviour {
         }
 
         // update state
-        mIsColliding = isColliding;
+        m_IsColliding = isColliding;
     }
 
     /// reset the current scene

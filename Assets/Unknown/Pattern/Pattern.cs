@@ -11,7 +11,7 @@ public struct Pattern {
 
     // -- p/private
     /// the current percent
-    float mPercent;
+    float m_Percent;
 
     // -- commands --
     public void MoveTo(float pct) {
@@ -36,17 +36,17 @@ public struct Pattern {
         // update props
         Point0 = p0;
         Point1 = p1;
-        mPercent = pct;
+        m_Percent = pct;
     }
 
     // -- queries --
     /// the current percent
     public float Percent {
-        get => mPercent;
+        get => m_Percent;
     }
 
     /// the current anchor index
     public int AnchorIndex {
-        get => Mathf.Min(Mathf.FloorToInt(mPercent / 0.25f), 3);
+        get => Mathf.Min(Mathf.FloorToInt(m_Percent / 0.25f), 3);
     }
 }

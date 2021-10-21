@@ -4,12 +4,12 @@ using System.Linq;
 public readonly struct Chord {
     // -- props --
     /// the chord tones
-    readonly Tone[] mTones;
+    readonly Tone[] m_Tones;
 
     // -- lifetime --
     /// create a chord from a list of tones
     public Chord(params Tone[] tones) {
-        mTones = tones;
+        m_Tones = tones;
     }
 
     /// create a chord from a root note and a chord quality, building its tones
@@ -25,22 +25,22 @@ public readonly struct Chord {
         }
 
         // build a chord
-        mTones = tones;
+        m_Tones = tones;
     }
 
     // -- queries --
     /// the number of notes in this chord
     public int Length {
-        get => mTones.Length;
+        get => m_Tones.Length;
     }
 
     /// the tone at the position
     public Tone this[int i] {
-        get => mTones[i];
+        get => m_Tones[i];
     }
 
     // -- debugging --
     public override string ToString() {
-        return string.Join(" ", mTones.Select((n) => n.ToString()));
+        return string.Join(" ", m_Tones.Select((n) => n.ToString()));
     }
 }

@@ -4,21 +4,21 @@ using System;
 public struct Lens<T> {
     // -- props --
     /// the getter
-    Func<T> mGet;
+    Func<T> m_Get;
 
     /// the setter
-    Action<T> mSet;
+    Action<T> m_Set;
 
     // -- lifetime --
     public Lens(Func<T> get, Action<T> set) {
-        mGet = get;
-        mSet = set;
+        m_Get = get;
+        m_Set = set;
     }
 
     // -- props/hot --
     /// the value of this lens
     public T Val {
-        get => mGet.Invoke();
-        set => mSet.Invoke(value);
+        get => m_Get.Invoke();
+        set => m_Set.Invoke(value);
     }
 }

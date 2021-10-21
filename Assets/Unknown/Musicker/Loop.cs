@@ -2,16 +2,16 @@
 public sealed class Loop {
     // -- props --
     /// the index of the current tone
-    int mCurr;
+    int m_Curr;
 
     /// the tones in this progression
-    readonly Tone[] mTones;
+    readonly Tone[] m_Tones;
 
     /// the fade time in seconds
-    float mFade;
+    float m_Fade;
 
     /// the blend time in seconds
-    float mBlend;
+    float m_Blend;
 
     // -- lifetime --
     /// create a new loop
@@ -20,32 +20,32 @@ public sealed class Loop {
         float blend = 0.0f,
         params Tone[] tones
     ) {
-        mCurr = 0;
-        mFade = fade;
-        mBlend = blend;
-        mTones = tones;
+        m_Curr = 0;
+        m_Fade = fade;
+        m_Blend = blend;
+        m_Tones = tones;
     }
 
     // -- commands --
     /// move to the next tone
     public void Advance() {
-        var next = mCurr + 1;
-        mCurr = next % mTones.Length;
+        var next = m_Curr + 1;
+        m_Curr = next % m_Tones.Length;
     }
 
     // -- queries --
     /// the current tone
     public Tone Curr() {
-        return mTones[mCurr];
+        return m_Tones[m_Curr];
     }
 
     /// the fade time in seconds
     public float Fade {
-        get => mFade;
+        get => m_Fade;
     }
 
     /// the blend time in seconds
     public float Blend {
-        get => mBlend;
+        get => m_Blend;
     }
 }

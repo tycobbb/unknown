@@ -1,46 +1,47 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 /// a thing that plays music
 public class Musicker: MonoBehaviour {
     // -- config --
     [Header("config")]
     [Tooltip("the number of audio sources to create or keep")]
-    [SerializeField] int mNumSources = 4;
+    [SerializeField] int m_NumSources = 4;
 
     [Tooltip("the audio source to realize sound")]
-    [SerializeField] List<AudioSource> mSources;
+    [SerializeField] List<AudioSource> m_Sources;
 
     [Tooltip("their current instrument")]
-    [SerializeField] Instrument mInstrument;
+    [SerializeField] Instrument m_Instrument;
 
     // -- props --
     /// the index of the next available audio source
-    int mNextSource = 0;
+    int m_NextSource = 0;
 
     /// the master volume for all audio sources
     /// TODO: this only works w/ loops right now
-    float mVolume = 1.0f;
+    float m_Volume = 1.0f;
 
     /// the per-source volumes
     /// TODO: hmm
-    float[] mSourceVolumes;
+    float[] m_SourceVolumes;
 
     /// the id of the current loop
-    int mLoopId;
+    int m_LoopId;
 
     // -- lifecycle --
     void Awake() {
         var go = gameObject;
 
         // init volumes
-        mSourceVolumes = new float[mNumSources];
+        m_SourceVolumes = new float[m_NumSources];
 
         // create audio sources
-        for (var i = mSources.Count; i < mNumSources; i++) {
-            mSources.Add(go.AddComponent<AudioSource>());
-            mSourceVolumes[i] = 1.0f;
+        for (var i = m_Sources.Count; i < m_NumSources; i++) {
+            m_Sources.Add(go.AddComponent<AudioSource>());
+            m_SourceVolumes[i] = 1.0f;
         }
     }
 
@@ -74,15 +75,15 @@ public class Musicker: MonoBehaviour {
 
     /// play the loop
     IEnumerator PlayLoopAsync(Loop loop, Key? key = null) {
-        mLoopId++;
-        var id = mLoopId;
+        m_LoopId++;
+        var id = m_LoopId;
 
         // fade in the loop
         StartCoroutine(FadeIn(MasterVolume(), loop.Fade));
 
         // the time between loop plays
         var blend = loop.Blend;
-        var interval = mInstrument.Duration - blend;
+        var interval = m_Instrument.Duration - blend;
 
         // play the tones in sequence until stopped
         while (true) {
@@ -97,7 +98,7 @@ public class Musicker: MonoBehaviour {
             yield return new WaitForSeconds(interval);
 
             // stop if this loop was cancelled
-            if (id != mLoopId) {
+            if (id != m_LoopId) {
                 break;
             }
 
@@ -109,7 +110,7 @@ public class Musicker: MonoBehaviour {
     /// stops the active loop, if any
     public void StopLoop(Loop loop) {
         if (IsPlayingLoop) {
-            mLoopId++;
+            m_LoopId++;
             StartCoroutine(StopLoopAsync(loop));
         }
     }
@@ -149,18 +150,18 @@ public class Musicker: MonoBehaviour {
         }
 
         // play the clip
-        PlayClip(mInstrument.FindClip(tone));
+        PlayClip(m_Instrument.FindClip(tone));
     }
 
     /// play a random audio clip
     public void PlayRand() {
-        PlayClip(mInstrument.RandClip());
+        PlayClip(m_Instrument.RandClip());
     }
 
     // -- c/config
     /// set the pitch of this player
     public void SetPitch(float pitch) {
-        foreach (var source in mSources) {
+        foreach (var source in m_Sources) {
             source.pitch = pitch;
         }
     }
@@ -174,7 +175,7 @@ public class Musicker: MonoBehaviour {
         source.Play();
 
         // advance the source
-        mNextSource = (mNextSource + 1) % mNumSources;
+        m_NextSource = (m_NextSource + 1) % m_NumSources;
     }
 
     /// fade in the volume to its current volume over the duration
@@ -211,11 +212,11 @@ public class Musicker: MonoBehaviour {
     void Reset() {
         StopAllCoroutines();
 
-        mVolume = 1.0f;
+        m_Volume = 1.0f;
 
-        for (var i = 0; i < mNextSource; i++) {
-            mSources[i].volume = 1.0f;
-            mSourceVolumes[i] = 1.0f;
+        for (var i = 0; i < m_NextSource; i++) {
+            m_Sources[i].volume = 1.0f;
+            m_SourceVolumes[i] = 1.0f;
         }
     }
 
@@ -227,19 +228,19 @@ public class Musicker: MonoBehaviour {
     // -- props/hot
     /// the current instrument
     public Instrument Instrument {
-        get => mInstrument;
-        set => mInstrument = value;
+        get => m_Instrument;
+        set => m_Instrument = value;
     }
 
     // -- queries --
     /// if there is a loop playing
     public bool IsPlayingLoop {
-        get => mLoopId % 2 == 0;
+        get => m_LoopId % 2 == 0;
     }
 
     /// if the musicker has any sources available
     public bool IsAvailable() {
-        foreach (var source in mSources) {
+        foreach (var source in m_Sources) {
             if (!source.isPlaying) {
                 return true;
             }
@@ -250,27 +251,27 @@ public class Musicker: MonoBehaviour {
 
     /// get the next audio source
     AudioSource NextSource() {
-        return mSources[mNextSource];
+        return m_Sources[m_NextSource];
     }
 
     /// get a lens for the master volume
     Lens<float> MasterVolume() {
         return new Lens<float>(
-            ( ) => mVolume,
-            (v) => mVolume = v
+            ( ) => m_Volume,
+            (v) => m_Volume = v
         );
     }
 
     /// gets a lens for the next source's volume
     Lens<float> NextSourceVolume() {
-        var i = mNextSource;
-        var s = mSources[i];
+        var i = m_NextSource;
+        var s = m_Sources[i];
 
         return new Lens<float>(
-            ( ) => mSourceVolumes[i],
+            ( ) => m_SourceVolumes[i],
             (v) => {
-                mSourceVolumes[i] = v;
-                s.volume = v * mVolume;
+                m_SourceVolumes[i] = v;
+                s.volume = v * m_Volume;
             }
         );
     }

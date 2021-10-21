@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
@@ -7,106 +6,105 @@ using UnityEngine.Serialization;
 public class Player: MonoBehaviour {
     // -- deps --
     /// the score module
-    Score mScore;
+    Score m_Score;
 
     // -- tuning --
     [Header("tuning")]
     [Tooltip("the hitbox at the end of the line")]
-    [SerializeField] PlayerHitbox mHitbox;
+    [SerializeField] PlayerHitbox m_Hitbox;
 
     [Tooltip("the move speed in percent per second")]
-    [SerializeField] float mMoveSpeed = 0.5f;
+    [SerializeField] float m_MoveSpeed = 0.5f;
 
     // -- nodes --
     [Header("nodes")]
     [Tooltip("the player's line")]
-    [SerializeField] Shapes.Line mLine;
+    [SerializeField] Shapes.Line m_Line;
 
     [Tooltip("the player's hand")]
-    [SerializeField] Transform mHand;
+    [SerializeField] Transform m_Hand;
 
     [Tooltip("the player's ghost trail")]
-    [SerializeField] Shapes.Line mTrail;
+    [SerializeField] Shapes.Line m_Trail;
 
     [Tooltip("the player's ghost endpoint")]
-    [SerializeField] Transform mGhost;
+    [SerializeField] Transform m_Ghost;
 
-    [FormerlySerializedAs("mMusic")]
     [Tooltip("plays voice music")]
-    [SerializeField] Musicker mVoice;
+    [SerializeField] Musicker m_Voice;
 
     [Tooltip("plays footstep music")]
-    [SerializeField] Musicker mFootsteps;
+    [SerializeField] Musicker m_Footsteps;
 
     [Tooltip("the input system input")]
-    [SerializeField] PlayerFlick mFlick;
+    [SerializeField] PlayerFlick m_Flick;
 
     [Tooltip("the input system input")]
-    [SerializeField] PlayerInput mInput;
+    [SerializeField] PlayerInput m_Input;
 
     // -- props --
     /// the player's config
-    PlayerConfig mConfig;
+    PlayerConfig m_Config;
 
     /// if this is the first frame
-    bool mIsFirstFrame = true;
+    bool m_IsFirstFrame = true;
 
     /// the musical key
-    Key mKey;
+    Key m_Key;
 
     /// the line pattern
-    Pattern mPattern;
+    Pattern m_Pattern;
 
     /// the destination move angle [0...1]
-    float mPercentDest;
+    float m_PercentDest;
 
     /// the pattern's anchor index
-    Draft<int> mAnchorIndex = new Draft<int>(-1);
+    Draft<int> m_AnchorIndex = new Draft<int>(-1);
 
     /// a line as the player's anchor changes
-    Line mVoiceLine;
+    Line m_VoiceLine;
 
     /// a loop to when moving
-    Loop mFootstepsLoop;
+    Loop m_FootstepsLoop;
 
     /// a chord on hit
-    Chord mHitChord;
+    Chord m_HitChord;
 
     /// a chord on getting hit
-    Chord mHurtChord;
+    Chord m_HurtChord;
 
     /// the player's inputs
-    PlayerActions mActions;
+    PlayerActions m_Actions;
 
     // -- lifecycle --
     void Awake() {
         // set deps
-        mScore = Score.Get;
+        m_Score = Score.Get;
 
         // set props
-        mPattern = new Pattern();
-        mActions = new PlayerActions(mInput);
+        m_Pattern = new Pattern();
+        m_Actions = new PlayerActions(m_Input);
 
         // set music
-        mVoiceLine = new Line(
+        m_VoiceLine = new Line(
             Tone.III,
             Tone.V,
             Tone.VII,
             Tone.I.Octave()
         );
 
-        mFootstepsLoop = new Loop(
+        m_FootstepsLoop = new Loop(
             fade: 1.5f,
             blend: 0.6f,
             Tone.I
         );
 
-        mHitChord = new Chord(
+        m_HitChord = new Chord(
             Tone.V,
             Quality.P5
         );
 
-        mHurtChord = new Chord(
+        m_HurtChord = new Chord(
             Tone.II,
             Quality.Min3
         );
@@ -129,49 +127,49 @@ public class Player: MonoBehaviour {
     /// init this player on join
     public void Join(PlayerConfig cfg) {
         name = $"Player{cfg.Index}";
-        mConfig = cfg;
+        m_Config = cfg;
 
         Debug.Log($"{name} joined");
     }
 
     /// apply player config
     void Configure() {
-        var cfg = mConfig;
+        var cfg = m_Config;
 
         // apply config
-        mKey = new Key(cfg.Key);
+        m_Key = new Key(cfg.Key);
 
         // grab shapes
-        var hand = mHand.GetComponent<Shapes.Disc>();
-        var ghost = mGhost.GetComponent<Shapes.Disc>();
+        var hand = m_Hand.GetComponent<Shapes.Disc>();
+        var ghost = m_Ghost.GetComponent<Shapes.Disc>();
 
         // decompose color
         var c = cfg.Color;
         Color.RGBToHSV(c, out var h, out var s, out var v);
 
         // set colors
-        mLine.Color = c;
-        mTrail.Color = FromHsv(h + (h > 0.5f ? -0.3f : 0.3f), s, v, a: 0.5f);
+        m_Line.Color = c;
+        m_Trail.Color = FromHsv(h + (h > 0.5f ? -0.3f : 0.3f), s, v, a: 0.5f);
         ghost.Color = FromHsv(h, s - 0.3f, v + 0.5f, a: 0.5f);
         hand.Color = ghost.Color;
 
         // size hand
-        hand.Radius = mHitbox.Radius;
+        hand.Radius = m_Hitbox.Radius;
 
         // set music props
-        mVoice.Instrument = cfg.VoiceInstrument;
-        mFootsteps.Instrument = cfg.FootstepsInstrument;
+        m_Voice.Instrument = cfg.VoiceInstrument;
+        m_Footsteps.Instrument = cfg.FootstepsInstrument;
 
         // set initial position
-        mPattern.MoveTo(cfg.Percent);
+        m_Pattern.MoveTo(cfg.Percent);
 
         // show score
-        mScore.AddPlayer(cfg);
+        m_Score.AddPlayer(cfg);
     }
 
     /// read move pattern
     void ReadMove() {
-        var mDir = mActions.Move;
+        var mDir = m_Actions.Move;
 
         // map the analog stick position to the pattern [0,1]
         if (mDir != Vector2.zero) {
@@ -182,13 +180,13 @@ public class Player: MonoBehaviour {
                 angle = 360.0f - angle;
             }
 
-            mPercentDest = angle / 360.0f;
+            m_PercentDest = angle / 360.0f;
         }
 
         // play footsteps when moving
         var isMoving = mDir != Vector2.zero;
-        if (isMoving != mFootsteps.IsPlayingLoop) {
-            mFootsteps.ToggleLoop(mFootstepsLoop, isMoving, mKey);
+        if (isMoving != m_Footsteps.IsPlayingLoop) {
+            m_Footsteps.ToggleLoop(m_FootstepsLoop, isMoving, m_Key);
         }
     }
 
@@ -198,25 +196,25 @@ public class Player: MonoBehaviour {
         MovePattern();
 
         // try to release the flick
-        mFlick.TryRelease();
+        m_Flick.TryRelease();
 
         // get pattern pos
-        var p0 = mPattern.Point0;
-        var p1 = mPattern.Point1;
-        var pe = p1 + mFlick.Offset;
+        var p0 = m_Pattern.Point0;
+        var p1 = m_Pattern.Point1;
+        var pe = p1 + m_Flick.Offset;
 
         // move to the new positions
         SyncPosition(p0, p1, pe);
-        mIsFirstFrame = false;
+        m_IsFirstFrame = false;
 
         // raise move pitch based on offset
-        mFootsteps.SetPitch(1.0f + mFlick.PitchShift);
+        m_Footsteps.SetPitch(1.0f + m_Flick.PitchShift);
     }
 
     void MovePattern() {
         // check the distance to our destination
-        var pct0 = mPattern.Percent;
-        var pct1 = mPercentDest;
+        var pct0 = m_Pattern.Percent;
+        var pct1 = m_PercentDest;
         var dist = pct1 - pct0;
 
         // if there is anywhere to move
@@ -234,62 +232,62 @@ public class Player: MonoBehaviour {
         }
 
         // lerp the angle into the pattern
-        var pcti = pct0 + mMoveSpeed * Time.deltaTime * mDir;
+        var pcti = pct0 + m_MoveSpeed * Time.deltaTime * mDir;
 
         // if we overshot, snap to target
         if (Mathf.Sign(pct1 - pcti) != dDir) {
             pcti = pct1;
         }
 
-        mPattern.MoveTo(pcti);
+        m_Pattern.MoveTo(pcti);
 
         // play voice when anchor changes
-        var i = mPattern.AnchorIndex;
-        mAnchorIndex.Val = i;
-        if (mAnchorIndex.IsDirty) {
-            mVoice.PlayTone(mVoiceLine[i], mKey);
+        var i = m_Pattern.AnchorIndex;
+        m_AnchorIndex.Val = i;
+        if (m_AnchorIndex.IsDirty) {
+            m_Voice.PlayTone(m_VoiceLine[i], m_Key);
         }
     }
 
     /// sync player position
     void SyncPosition(Vector2 p0, Vector2 p1, Vector2 pe) {
         // move hitbox
-        mHitbox.Position = pe;
+        m_Hitbox.Position = pe;
 
         // move actual line
-        mLine.Start = p0;
-        mLine.End = pe;
-        mHand.localPosition = pe;
+        m_Line.Start = p0;
+        m_Line.End = pe;
+        m_Hand.localPosition = pe;
 
         // move ghost trail
-        mTrail.Start = p1;
-        mTrail.End = pe;
-        mGhost.localPosition = p1;
+        m_Trail.Start = p1;
+        m_Trail.End = pe;
+        m_Ghost.localPosition = p1;
     }
 
     // -- queries --
     /// check if the player's overlap
     public bool Overlaps(Player other) {
-        return mHitbox.Overlaps(other.mHitbox);
+        return m_Hitbox.Overlaps(other.m_Hitbox);
     }
 
     /// if this player is releasing
     bool IsReleasing {
-        get => mFlick.IsReleasing;
+        get => m_Flick.IsReleasing;
     }
 
     // -- events --
     public void OnCollision(Player other) {
         // play the chord
         if (IsReleasing) {
-            mVoice.PlayChord(mHitChord, mKey);
+            m_Voice.PlayChord(m_HitChord, m_Key);
         } else if (other.IsReleasing) {
-            mVoice.PlayChord(mHurtChord, mKey);
+            m_Voice.PlayChord(m_HurtChord, m_Key);
         }
 
         // record the hit
         if (IsReleasing) {
-            mScore.RecordHit(mConfig, mFlick.Speed);
+            m_Score.RecordHit(m_Config, m_Flick.Speed);
         }
     }
 

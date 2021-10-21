@@ -4,31 +4,31 @@ using System;
 public struct Draft<T> where T: IEquatable<T> {
     // -- props --
     /// the value
-    T mValue;
+    T m_Value;
 
     /// if last mutation changed the value
-    bool mIsDirty;
+    bool m_IsDirty;
 
     // -- lifetime --
     /// create a draft with an initial value
     public Draft(T value) {
-        mValue = value;
-        mIsDirty = false;
+        m_Value = value;
+        m_IsDirty = false;
     }
 
     // -- props/hot --
     /// the underlying value
     public T Val {
-        get => mValue;
+        get => m_Value;
         set {
-            var prev = mValue;
-            mValue = value;
-            mIsDirty = !prev.Equals(value);
+            var prev = m_Value;
+            m_Value = value;
+            m_IsDirty = !prev.Equals(value);
         }
     }
 
     /// if this value is dirty
     public bool IsDirty {
-        get => mIsDirty;
+        get => m_IsDirty;
     }
 }

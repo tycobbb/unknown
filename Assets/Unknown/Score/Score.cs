@@ -1,7 +1,6 @@
 using System;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 /// the score ui label
 public class Score: MonoBehaviour {
@@ -18,28 +17,25 @@ public class Score: MonoBehaviour {
     // -- tuning --
     [Header("tuning")]
     [Tooltip("the scale to apply to hit speed")]
-    [SerializeField] float mHitSpeedScale = 0.3f;
+    [SerializeField] float m_HitSpeedScale = 0.3f;
 
     // -- nodes --
     [Header("config")]
     [Tooltip("the timer label")]
-    [SerializeField] TMP_Text mTimerLabel;
+    [SerializeField] TMP_Text m_TimerLabel;
 
-    [FormerlySerializedAs("mSavedTimerLabels")]
-    [FormerlySerializedAs("mLabels")]
     [Tooltip("the finish time labels")]
-    [SerializeField] TMP_Text[] mFinishTimeLabels;
+    [SerializeField] TMP_Text[] m_FinishTimeLabels;
 
-    [FormerlySerializedAs("mLabels")]
     [Tooltip("the player score labels")]
-    [SerializeField] TMP_Text[] mScoreLabels;
+    [SerializeField] TMP_Text[] m_ScoreLabels;
 
     // -- props --
     /// the start time
-    float? mElapsed;
+    float? m_Elapsed;
 
     /// the player score records
-    PlayerRecord[] mRecords = new PlayerRecord[2];
+    PlayerRecord[] m_Records = new PlayerRecord[2];
 
     // -- lifecycle --
     void FixedUpdate() {
@@ -51,10 +47,10 @@ public class Score: MonoBehaviour {
     public void AddPlayer(PlayerConfig cfg) {
         // add player
         var i = cfg.Index;
-        mRecords[i] = new PlayerRecord();
+        m_Records[i] = new PlayerRecord();
 
         // show score label
-        var label = mScoreLabels[i];
+        var label = m_ScoreLabels[i];
         label.color = cfg.Color;
         label.enabled = true;
 
@@ -70,14 +66,14 @@ public class Score: MonoBehaviour {
 
     /// record the start of the game
     void RecordStart() {
-        mElapsed = 0.0f;
-        mTimerLabel.color = Color.white;
-        mTimerLabel.enabled = true;
+        m_Elapsed = 0.0f;
+        m_TimerLabel.color = Color.white;
+        m_TimerLabel.enabled = true;
     }
 
     /// record a hit
     public void RecordHit(PlayerConfig cfg, float speed) {
-        var rec = mRecords[cfg.Index];
+        var rec = m_Records[cfg.Index];
 
         // record finish if already reached max
         if (!rec.FinalHit && CalcScore(rec) >= cMaxScore) {
@@ -93,29 +89,29 @@ public class Score: MonoBehaviour {
 
     /// record a player finishing
     void RecordFinish(PlayerConfig cfg) {
-        var rec = mRecords[cfg.Index];
+        var rec = m_Records[cfg.Index];
         rec.FinalHit = true;
-        rec.FinishTime = mElapsed;
+        rec.FinishTime = m_Elapsed;
         ShowFinishTime(cfg);
     }
 
     /// sync the time display
     void SyncTimer() {
-        if (mElapsed == null) {
+        if (m_Elapsed == null) {
             return;
         }
 
-        mElapsed += Time.fixedDeltaTime;
-        mTimerLabel.text = TimeToString(mElapsed.Value);
+        m_Elapsed += Time.fixedDeltaTime;
+        m_TimerLabel.text = TimeToString(m_Elapsed.Value);
     }
 
     /// show the next available finish time label
     void ShowFinishTime(PlayerConfig cfg) {
-        var rec = mRecords[cfg.Index];
+        var rec = m_Records[cfg.Index];
 
         // find next label
         var label = null as TMP_Text;
-        foreach (var l in mFinishTimeLabels) {
+        foreach (var l in m_FinishTimeLabels) {
             if (l.enabled) {
                 continue;
             }
@@ -142,8 +138,8 @@ public class Score: MonoBehaviour {
 
     /// sync the score display
     void SyncScores() {
-        for (var i = 0; i < mRecords.Length; i++) {
-            var rec = mRecords[i];
+        for (var i = 0; i < m_Records.Length; i++) {
+            var rec = m_Records[i];
             if (rec == null) {
                 continue;
             }
@@ -155,14 +151,14 @@ public class Score: MonoBehaviour {
                 score = rec.FinalHit ? 42.0f : 39.9f;
             }
 
-            mScoreLabels[i].text = $"{score:0.0}";
+            m_ScoreLabels[i].text = $"{score:0.0}";
         }
     }
 
     // -- queries --
     /// calculate total score from record
     float CalcScore(PlayerRecord record) {
-        return record.HitSpeed * mHitSpeedScale;
+        return record.HitSpeed * m_HitSpeedScale;
     }
 
     /// format time as a string

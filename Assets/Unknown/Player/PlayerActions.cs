@@ -5,26 +5,26 @@ using UnityEngine.InputSystem;
 public class PlayerActions {
     // -- props --
     /// the move action
-    InputAction mMove;
+    InputAction m_Move;
 
     /// the flick action
-    InputAction mFlick;
+    InputAction m_Flick;
 
     // -- lifetime --
     /// create a new actions wrapper
     public PlayerActions(PlayerInput input) {
-        mMove = input.currentActionMap["Move"];
-        mFlick = input.currentActionMap["Flick"];
+        m_Move = input.currentActionMap["Move"];
+        m_Flick = input.currentActionMap["Flick"];
     }
 
     // -- queries --
     /// the move position
     public Vector2 Move {
-        get => mMove.ReadValue<Vector2>();
+        get => m_Move.ReadValue<Vector2>();
     }
 
     /// the flick position
     public Vector2 Flick {
-        get => mFlick.ReadValue<Vector2>();
+        get => m_Flick.ReadValue<Vector2>();
     }
 }
