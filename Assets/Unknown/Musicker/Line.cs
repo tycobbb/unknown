@@ -18,13 +18,18 @@ public sealed class Line {
     /// move to the next tone
     public void Advance() {
         var next = m_Curr + 1;
-        m_Curr = next % m_Tones.Length;
+        m_Curr = next % Length;
     }
 
     // -- queries --
     /// the current tone
     public Tone Curr() {
         return m_Tones[m_Curr];
+    }
+
+    /// the length of the line
+    public int Length {
+        get => m_Tones.Length;
     }
 
     /// the tone at the position

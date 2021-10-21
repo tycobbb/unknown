@@ -316,7 +316,7 @@ MonoBehaviour:
   m_Hitbox:
     Position: {x: 0, y: 0}
     Radius: 0.025
-  m_MoveSpeed: 0.4
+  m_MoveSpeed: 0.6
   m_Line: {fileID: 3898287554920713603}
   m_Hand: {fileID: 6117586667251438520}
   m_Trail: {fileID: 2980957337658543330}

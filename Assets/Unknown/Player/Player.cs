@@ -55,6 +55,9 @@ public class Player: MonoBehaviour {
     /// the destination move angle [0...1]
     float m_PercentDest;
 
+    /// if the player is idle
+    bool m_IsMoving = false;
+
     /// the pattern's anchor index
     Draft<int> m_AnchorIndex = new Draft<int>(-1);
 
@@ -168,8 +171,11 @@ public class Player: MonoBehaviour {
     void ReadMove() {
         var mDir = m_Actions.Move;
 
-        // if neutral, stop moving
-        if (mDir == Vector2.zero) {
+        // check if idle
+        m_IsMoving = mDir != Vector2.zero;
+
+        // if so, stop moving
+        if (!m_IsMoving) {
             m_PercentDest = m_Pattern.Percent;
         }
         // or, map the analog stick position to the pattern [0,1]
@@ -182,12 +188,6 @@ public class Player: MonoBehaviour {
             }
 
             m_PercentDest = angle / 360.0f;
-        }
-
-        // play footsteps when moving
-        var isMoving = mDir != Vector2.zero;
-        if (isMoving != m_Footsteps.IsPlayingLoop) {
-            m_Footsteps.ToggleLoop(m_FootstepsLoop, isMoving, m_Key);
         }
     }
 
@@ -209,6 +209,11 @@ public class Player: MonoBehaviour {
 
         // raise move pitch based on offset
         m_Footsteps.SetPitch(1.0f + m_Flick.PitchShift);
+
+        // play footsteps when moving
+        if (m_IsMoving != m_Footsteps.IsPlayingLoop) {
+            m_Footsteps.ToggleLoop(m_FootstepsLoop, m_IsMoving, m_Key);
+        }
     }
 
     void MovePattern() {
@@ -218,7 +223,7 @@ public class Player: MonoBehaviour {
         var dist = pct1 - pct0;
 
         // if there is anywhere to move
-        if (dist == 0.0f) {
+        if (dist == 0.0f || dist == 1.0f) {
             return;
         }
 
@@ -242,8 +247,7 @@ public class Player: MonoBehaviour {
         m_Pattern.MoveTo(pcti);
 
         // play voice when anchor changes
-        var i = m_Pattern.AnchorIndex;
-        m_AnchorIndex.Val = i;
+        var i = m_AnchorIndex.Val = m_Pattern.AnchorIndex;
         if (m_AnchorIndex.IsDirty) {
             m_Voice.PlayTone(m_VoiceLine[i], m_Key);
         }

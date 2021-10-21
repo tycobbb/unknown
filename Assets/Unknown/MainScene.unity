@@ -443,11 +443,27 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 680607397}
     - target: {fileID: 1010824611441724976, guid: 4d1857a162d284fed8ee58a258f631de, type: 3}
+      propertyPath: m_PlayerConfigs.Array.data[0].VoiceInstrument
+      value: 
+      objectReference: {fileID: 680607397}
+    - target: {fileID: 1010824611441724976, guid: 4d1857a162d284fed8ee58a258f631de, type: 3}
+      propertyPath: m_PlayerConfigs.Array.data[1].VoiceInstrument
+      value: 
+      objectReference: {fileID: 680607397}
+    - target: {fileID: 1010824611441724976, guid: 4d1857a162d284fed8ee58a258f631de, type: 3}
       propertyPath: mPlayerConfigs.Array.data[0].FootstepsInstrument
       value: 
       objectReference: {fileID: 863167442443756462}
     - target: {fileID: 1010824611441724976, guid: 4d1857a162d284fed8ee58a258f631de, type: 3}
       propertyPath: mPlayerConfigs.Array.data[1].FootstepsInstrument
+      value: 
+      objectReference: {fileID: 863167442443756462}
+    - target: {fileID: 1010824611441724976, guid: 4d1857a162d284fed8ee58a258f631de, type: 3}
+      propertyPath: m_PlayerConfigs.Array.data[0].FootstepsInstrument
+      value: 
+      objectReference: {fileID: 863167442443756462}
+    - target: {fileID: 1010824611441724976, guid: 4d1857a162d284fed8ee58a258f631de, type: 3}
+      propertyPath: m_PlayerConfigs.Array.data[1].FootstepsInstrument
       value: 
       objectReference: {fileID: 863167442443756462}
     - target: {fileID: 1010824611441724977, guid: 4d1857a162d284fed8ee58a258f631de, type: 3}
@@ -456,7 +472,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1010824611441724978, guid: 4d1857a162d284fed8ee58a258f631de, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1010824611441724979, guid: 4d1857a162d284fed8ee58a258f631de, type: 3}
       propertyPath: m_RootOrder
