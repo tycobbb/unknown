@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
-using UnityEngine.Serialization;
 
 /// the game
 public class Game: MonoBehaviour {
@@ -21,6 +20,22 @@ public class Game: MonoBehaviour {
     bool m_IsColliding = false;
 
     // -- lifecycle --
+    void Update() {
+        var k = Keyboard.current;
+
+        var ctrl = k.ctrlKey;
+        var r = k.rKey;
+        var s = k.sKey;
+
+        if (ctrl.isPressed && r.wasPressedThisFrame) {
+            Reset();
+        }
+
+        if (ctrl.isPressed && s.wasPressedThisFrame) {
+            Screenshot();
+        }
+    }
+
     void FixedUpdate() {
         TryCollide();
     }
@@ -76,16 +91,6 @@ public class Game: MonoBehaviour {
     }
 
     // -- events --
-    /// catch the reset input event
-    public void OnReset(InputAction.CallbackContext ctx) {
-        Reset();
-    }
-
-    /// catch the screenshot input event
-    public void OnScreenshot(InputAction.CallbackContext ctx) {
-        Screenshot();
-    }
-
     /// catch the player joined event
     public void OnPlayerJoined(Object obj) {
         // ignore call on startup where obj is the game (b/c it has an input?)
