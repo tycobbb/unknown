@@ -1,6 +1,6 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.Serialization;
 
 /// a player
 public class Player: MonoBehaviour {
@@ -41,6 +41,9 @@ public class Player: MonoBehaviour {
 
     [Tooltip("the input system input")]
     [SerializeField] PlayerInput m_Input;
+
+    [Tooltip("the hit effect prefab")]
+    [SerializeField] GameObject m_Hit;
 
     // -- props --
     /// the player's config
@@ -144,14 +147,19 @@ public class Player: MonoBehaviour {
         var ghost = m_Ghost.GetComponent<Shapes.Disc>();
 
         // decompose color
-        var c = cfg.Color;
-        Color.RGBToHSV(c, out var h, out var s, out var v);
+        var rgb = cfg.Color;
+        var hsv = rgb.ToHsv();
+
+        // build palette
+        var fg = rgb;
+        var accent = hsv.Add(h: hsv.H > 0.5f ? -0.3f : 0.3f).ToRgb(a: 0.5f);
+        var bg = hsv.Add(s: -0.3f, v: 0.5f).ToRgb(a: 0.5f);
 
         // set colors
-        m_Line.Color = c;
-        m_Trail.Color = FromHsv(h + (h > 0.5f ? -0.3f : 0.3f), s, v, a: 0.5f);
-        ghost.Color = FromHsv(h, s - 0.3f, v + 0.5f, a: 0.5f);
-        hand.Color = ghost.Color;
+        m_Line.Color = fg;
+        m_Trail.Color = accent;
+        ghost.Color = bg;
+        hand.Color = bg;
 
         // size hand
         hand.Radius = m_Hitbox.Radius;
@@ -167,7 +175,7 @@ public class Player: MonoBehaviour {
         m_Score.AddPlayer(cfg);
     }
 
-    /// read move pattern
+    /// read move position
     void ReadMove() {
         var mDir = m_Actions.Move;
 
@@ -216,6 +224,7 @@ public class Player: MonoBehaviour {
         }
     }
 
+    /// move the pattern to new percent
     void MovePattern() {
         // check the distance to our destination
         var pct0 = m_Pattern.Percent;
@@ -269,6 +278,27 @@ public class Player: MonoBehaviour {
         m_Ghost.localPosition = p1;
     }
 
+    /// trigger a hit
+    void Hit(Player other) {
+        // play the effect
+        if (IsReleasing) {
+            var hit = Instantiate(m_Hit, m_Hand.position, Quaternion.identity).GetComponent<Hit>();
+            hit.Play(m_Config, m_Hitbox.Radius);
+        }
+
+        // play the chord
+        if (IsReleasing) {
+            m_Voice.PlayChord(m_HitChord, m_Key);
+        } else if (other != null && other.IsReleasing) {
+            m_Voice.PlayChord(m_HurtChord, m_Key);
+        }
+
+        // record the hit
+        if (IsReleasing) {
+            m_Score.RecordHit(m_Config, m_Flick.Speed);
+        }
+    }
+
     // -- queries --
     /// check if the player's overlap
     public bool Overlaps(Player other) {
@@ -281,25 +311,8 @@ public class Player: MonoBehaviour {
     }
 
     // -- events --
+    /// when two players collide
     public void OnCollision(Player other) {
-        // play the chord
-        if (IsReleasing) {
-            m_Voice.PlayChord(m_HitChord, m_Key);
-        } else if (other.IsReleasing) {
-            m_Voice.PlayChord(m_HurtChord, m_Key);
-        }
-
-        // record the hit
-        if (IsReleasing) {
-            m_Score.RecordHit(m_Config, m_Flick.Speed);
-        }
-    }
-
-    // -- utils --
-    /// get rgb color from hsv
-    Color FromHsv(float h, float s, float v, float a = 1.0f) {
-        var c = Color.HSVToRGB(Mathf.Repeat(h, 1.0f), s, v);
-        c.a = a;
-        return c;
+        Hit(other);
     }
 }

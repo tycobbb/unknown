@@ -325,6 +325,7 @@ MonoBehaviour:
   m_Footsteps: {fileID: 5438007216668105070}
   m_Flick: {fileID: 8712634408959464779}
   m_Input: {fileID: 408289371547382750}
+  m_Hit: {fileID: 1748105126704352588, guid: 673a3072975d44f6dad39a20b1e255dc, type: 3}
 --- !u!114 &8712634408959464779
 MonoBehaviour:
   m_ObjectHideFlags: 0

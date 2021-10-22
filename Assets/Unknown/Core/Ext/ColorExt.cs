@@ -1,0 +1,17 @@
+using UnityEngine;
+
+/// unity color extensions
+public static class ColorExt {
+    // -- operators --
+    /// creates a new color with the alpha
+    public static Color A(this Color c, float a) {
+        c.a = a;
+        return c;
+    }
+
+    // -- factories --
+    /// create an hsv color from the rgb color
+    public static ColorHsv ToHsv(this Color c) {
+        return new ColorHsv(c);
+    }
+}
