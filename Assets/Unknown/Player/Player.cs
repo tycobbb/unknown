@@ -1,3 +1,4 @@
+using System.Collections;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -39,14 +40,14 @@ public class Player: MonoBehaviour {
     [Tooltip("plays footstep music")]
     [SerializeField] Musicker m_Steps;
 
-    [Tooltip("the input system input")]
+    [Tooltip("the flick action")]
     [SerializeField] PlayerFlick m_Flick;
+
+    [Tooltip("the hitstop")]
+    [SerializeField] PlayerHitStop m_HitStop;
 
     [Tooltip("the input system input")]
     [SerializeField] PlayerInput m_Input;
-
-    [Tooltip("the hit effect prefab")]
-    [SerializeField] GameObject m_Hit;
 
     // -- props --
     /// the player's config
@@ -126,6 +127,7 @@ public class Player: MonoBehaviour {
     void FixedUpdate() {
         // read input
         ReadMove();
+
         // move line
         Move();
     }
@@ -245,11 +247,13 @@ public class Player: MonoBehaviour {
 
     /// move line into position
     void Move() {
+        // if not in hitstop
+        if (m_HitStop.IsActive) {
+            return;
+        }
+
         // move the pattern
         MovePattern();
-
-        // try to release the flick
-        m_Flick.TryRelease();
 
         // get pattern pos
         var p0 = m_Pattern.Point0;
@@ -325,24 +329,42 @@ public class Player: MonoBehaviour {
         m_Ghost.transform.localPosition = p1;
     }
 
-    /// trigger a hit
-    void Hit(Player other) {
-        // play the effect
-        if (IsReleasing) {
-            var hit = Instantiate(m_Hit, m_Hand.transform.position, Quaternion.identity).GetComponent<Hit>();
-            hit.Play(m_Config, m_Hitbox.Radius);
+    /// trigger a collision
+    void HitPlayer(Player other) {
+        // if at least one player is attacking
+        var isAttacker = IsReleasing;
+        var isAttacked = other.IsReleasing;
+
+        if (!isAttacker && !isAttacked) {
+            return;
+        }
+
+        // cancel any active release
+        m_Flick.Cancel();
+
+        // play hitstop effect
+        var mag = m_Flick.Speed;
+        m_HitStop.Play(mag);
+
+        // play hit effect
+        if (isAttacker) {
+            Hit.Play(
+                m_Config,
+                m_Hand.transform.position,
+                m_Hitbox.Radius
+            );
         }
 
         // play the chord
-        if (IsReleasing) {
+        if (isAttacker) {
             m_Voice.PlayChord(m_HitChord, m_Key);
-        } else if (other != null && other.IsReleasing) {
+        } else {
             m_Voice.PlayChord(m_HurtChord, m_Key);
         }
 
         // record the hit
-        if (IsReleasing) {
-            m_Score.RecordHit(m_Config, m_Flick.Speed);
+        if (isAttacker) {
+            m_Score.RecordHit(m_Config, mag);
         }
     }
 
@@ -370,6 +392,6 @@ public class Player: MonoBehaviour {
     // -- events --
     /// when two players collide
     public void OnCollision(Player other) {
-        Hit(other);
+        HitPlayer(other);
     }
 }

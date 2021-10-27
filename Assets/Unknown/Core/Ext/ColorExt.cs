@@ -11,7 +11,7 @@ public static class ColorExt {
 
     // -- factories --
     /// create an hsv color from the rgb color
-    public static ColorHsv ToHsv(this Color c) {
-        return new ColorHsv(c);
+    public static Colors.Hsv ToHsv(this Color c) {
+        return new Colors.Hsv(c);
     }
 }

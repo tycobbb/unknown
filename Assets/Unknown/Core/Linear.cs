@@ -1,27 +1,27 @@
 using System;
 using UnityEngine;
 
-/// a value that can be lerp'd
+/// the params for a linear equation
 [Serializable]
-public struct Linear<T> {
+public struct Linear {
     // -- props --
     [Tooltip("the destination value.")]
-    public T Dst;
+    public float Value;
 
     /// the time value, interpretable in a variety of ways
     [Tooltip("the time value. interpretation is context-dependent.")]
-    public float Time;
+    public float Scale;
 
     // -- lifetime --
     /// create a new linear value
-    public Linear(T dst, float time) {
-        Dst = dst;
-        Time = time;
+    public Linear(float val, float scale) {
+        Value = val;
+        Scale = scale;
     }
 
     // -- factories --
     /// creates a "zero" value
-    public static Linear<T> Zero {
-        get => new Linear<T>(default, 0.0f);
+    public static Linear Zero {
+        get => new Linear(0.0f, 0.0f);
     }
 }

@@ -2,6 +2,7 @@ using System.Collections;
 using DG.Tweening;
 using UnityEngine;
 
+/// a visual hit ring effect
 public class Hit: MonoBehaviour {
     // -- tuning --
     [Header("tuning")]
@@ -17,12 +18,19 @@ public class Hit: MonoBehaviour {
     [SerializeField] Shapes.Disc m_Circle;
 
     // -- commands --
-    /// play the hit effect w/ the player config and initial radius
-    public void Play(PlayerConfig cfg, float r0) {
+    /// play the hit effect w/ the player config and initial pos
+    public static void Play(PlayerConfig cfg, Vector2 p0, float r0) {
+        var obj = Instantiate(Single.Get.Hit, p0, Quaternion.identity);
+        var hit = obj.GetComponent<Hit>();
+        hit.Play(cfg, r0);
+    }
+
+    /// play the hit effect
+    void Play(PlayerConfig cfg, float r0) {
         StartCoroutine(PlayAsync(cfg, r0));
     }
 
-    /// play the hit effect w/ the player config and initial radius
+    /// play the hit effect
     IEnumerator PlayAsync(PlayerConfig cfg, float r0) {
         // get color
         var hsv = cfg.Color.ToHsv();
@@ -54,6 +62,6 @@ public class Hit: MonoBehaviour {
 
         // remove on complete
         yield return new WaitForSeconds(m_Duration);
-        Destroy(this);
+        Destroy(gameObject);
     }
 }

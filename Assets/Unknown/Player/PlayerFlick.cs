@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.Serialization;
 
 /// the player's flick gesture
 public class PlayerFlick: MonoBehaviour {
@@ -8,6 +7,9 @@ public class PlayerFlick: MonoBehaviour {
     [Header("tuning")]
     [Tooltip("the max length of the flick windup")]
     [SerializeField] float m_Scale = 0.1f;
+
+    [Tooltip("the speed the flick moves towards its pos in units / s")]
+    [SerializeField] float m_Speed = 0.1f;
 
     [Tooltip("the max pitch shift of the flick windup")]
     [SerializeField] float m_PitchScale = 0.3f;
@@ -23,12 +25,18 @@ public class PlayerFlick: MonoBehaviour {
 
     // -- nodes --
     [Header("nodes")]
+    [Tooltip("the hitstop")]
+    [SerializeField] PlayerHitStop m_HitStop;
+
     [Tooltip("the input system input")]
     [SerializeField] PlayerInput m_Input;
 
     // -- props --
-    /// the control offset
+    /// the current offset
     Vector2 m_Offset;
+
+    /// the target offset
+    Vector2 m_DestOffset;
 
     /// the player's inputs
     PlayerActions m_Actions;
@@ -58,20 +66,24 @@ public class PlayerFlick: MonoBehaviour {
         m_Actions = new PlayerActions(m_Input);
     }
 
-    void Update() {
+    void FixedUpdate() {
         // read input
         Read();
+
+        // move flick
+        Move();
+        TryRelease();
     }
 
     // -- commands --
     /// read flick
     void Read() {
         // capture prev and next offset
-        var prev = m_Offset;
+        var prev = m_DestOffset;
         var next = m_Actions.Flick;
 
         // update state
-        m_Offset = next;
+        m_DestOffset = next;
 
         // read a release gesture
         ReadRelease(prev, next);
@@ -88,7 +100,7 @@ public class PlayerFlick: MonoBehaviour {
         var delta = next - prev;
         var align = Vector2.Dot(prev.normalized, delta.normalized);
 
-        // if align flipped (dot is ~ -1.0f), this is a release
+        // if direction changed, this is a release
         if (Mathf.Abs(align + 1.0f) > m_ReleaseAlignment) {
             return;
         }
@@ -105,8 +117,39 @@ public class PlayerFlick: MonoBehaviour {
         m_ReleaseStrength = Mathf.Max(m_ReleaseStrength, delta.magnitude);
     }
 
+    /// move the flick towards its target position
+    void Move() {
+        // if not in hitstop
+        if (m_HitStop.IsActive) {
+            return;
+        }
+
+        // given direction to target
+        var dest = m_DestOffset;
+        var prev = m_Offset;
+        var pdir = Vec2.Normalize(dest - prev);
+
+        // move offset towards it
+        var next = prev + pdir * m_Speed * Time.time;
+
+        // snap if we overshot
+        var ndir = dest - next;
+        if (Vector2.Dot(pdir, ndir) < 0.0f) {
+            next = dest;
+        }
+
+        // update state
+        m_Offset = next;
+    }
+
     /// release the flick, if necessary, modifying the offset
-    public void TryRelease() {
+    void TryRelease() {
+        // if not in hitstop
+        if (m_HitStop.IsActive) {
+            return;
+        }
+
+        // if not releasing
         if (!IsReleasing) {
             return;
         }
@@ -116,7 +159,7 @@ public class PlayerFlick: MonoBehaviour {
 
         // if the release finished, clear it
         if (pct >= 1.0f) {
-            m_ReleaseFrame = null;
+            Cancel();
             return;
         }
 
@@ -135,15 +178,20 @@ public class PlayerFlick: MonoBehaviour {
         m_ReleaseSpeed = Vector2.Distance(prev, next) / Time.deltaTime;
     }
 
+    /// cancels an active release, if any
+    public void Cancel() {
+        m_ReleaseFrame = null;
+    }
+
     // -- queries --
     /// find current scaled offset
     public Vector2 Offset {
-        get => UnscaledOffset * m_Scale;
+        get => RawOffset * m_Scale;
     }
 
     /// the current pitch shift
     public float PitchShift {
-        get => UnscaledOffset.magnitude * m_PitchScale;
+        get => RawOffset.magnitude * m_PitchScale;
     }
 
     /// the current release speed
@@ -162,7 +210,7 @@ public class PlayerFlick: MonoBehaviour {
     }
 
     /// the current unscaled offset, depending on state
-    Vector2 UnscaledOffset {
+    Vector2 RawOffset {
         get => IsReleasing ? m_ReleaseOffset : m_Offset;
     }
 }

@@ -46,8 +46,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b20d0a57a907e49138c644c43a0a9438, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_RadiusMultiplier: 2
-  m_Root: {fileID: 0}
+  m_Duration: 0.5
+  m_SizeMultiplier: 15
   m_Circle: {fileID: 6912599164027273060}
 --- !u!114 &6912599164027273060
 MonoBehaviour:
