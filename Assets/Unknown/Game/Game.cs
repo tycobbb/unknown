@@ -11,21 +11,28 @@ public class Game: MonoBehaviour {
 
     // -- props --
     /// the current player count
-    int m_NumPlayers = 0;
+    int m_NumPlayers;
 
     /// the array of players
     Player[] m_Players = new Player[2];
 
     /// if the players are colliding
-    bool m_IsColliding = false;
+    bool m_IsColliding;
 
     // -- lifecycle --
-    void Update() {
+    void FixedUpdate() {
+        RunCommands();
+        TryCollide();
+    }
+
+    // -- commands --
+    /// run commands based on inputs
+    void RunCommands() {
         var k = Keyboard.current;
 
-        var ctrl = k.ctrlKey;
         var r = k.rKey;
         var s = k.sKey;
+        var ctrl = k.ctrlKey;
 
         if (ctrl.isPressed && r.wasPressedThisFrame) {
             Reset();
@@ -36,11 +43,6 @@ public class Game: MonoBehaviour {
         }
     }
 
-    void FixedUpdate() {
-        TryCollide();
-    }
-
-    // -- commands --
     /// add a new player to the game
     void AddPlayer(Player player) {
         var i = m_NumPlayers;

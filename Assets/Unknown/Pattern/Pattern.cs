@@ -2,12 +2,16 @@ using UnityEngine;
 
 /// the line pattern
 public struct Pattern {
+    // math constants
+    const float k_2Pi = Mathf.PI * 2.0f;
+    const float k_Pi2 = Mathf.PI * 0.5f;
+
     // -- props --
     /// the anchor point
-    public Vector2 Point0 { get; private set; }
+    Vector2 m_Point0;
 
     /// the floating point
-    public Vector2 Point1 { get; private set; }
+    Vector2 m_Point1;
 
     // -- p/private
     /// the current percent
@@ -26,13 +30,9 @@ public struct Pattern {
         p0.x = Mathf.Round(pcti);
         p0.y = Mathf.Round(Mathf.Repeat(pcti + 0.25f, 1.0f));
 
-        // math constants
-        const float k2Pi = Mathf.PI * 2.0f;
-        const float kPi2 = Mathf.PI * 0.5f;
-
         // get the rotation
-        var a0 = k2Pi - Mathf.Floor(pcti * 4.0f) * kPi2;
-        var at = a0 + Mathf.Repeat(pcti, 0.25f) * k2Pi;
+        var a0 = k_2Pi - Mathf.Floor(pcti * 4.0f) * k_Pi2;
+        var at = a0 + Mathf.Repeat(pcti, 0.25f) * k_2Pi;
 
         // find end point
         var p1 = p0;
@@ -40,14 +40,24 @@ public struct Pattern {
         p1.y += Mathf.Sin(at);
 
         // update props
-        Point0 = p0;
-        Point1 = p1;
+        m_Point0 = p0;
+        m_Point1 = p1;
 
         // set internal pct using actual value
         m_Percent = pct;
     }
 
     // -- queries --
+    /// the anchor point
+    public Vector2 Point0 {
+        get => m_Point0;
+    }
+
+    /// the floating point
+    public Vector2 Point1 {
+        get => m_Point1;
+    }
+
     /// the current percent
     public float Percent {
         get => m_Percent;

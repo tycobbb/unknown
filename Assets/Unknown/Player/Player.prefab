@@ -317,12 +317,36 @@ MonoBehaviour:
     Position: {x: 0, y: 0}
     Radius: 0.025
   m_MoveSpeed: 0.6
+  m_DashCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 89.06293
+      outSlope: 89.06293
+      tangentMode: 0
+      weightedMode: 2
+      inWeight: 0
+      outWeight: 0.116026394
+    - serializedVersion: 3
+      time: 0.2
+      value: 0
+      inSlope: -3.0463288
+      outSlope: -3.0463288
+      tangentMode: 0
+      weightedMode: 1
+      inWeight: 0.52203196
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   m_Line: {fileID: 3898287554920713603}
-  m_Hand: {fileID: 6117586667251438520}
+  m_Hand: {fileID: 6400796380260406308}
   m_Trail: {fileID: 2980957337658543330}
-  m_Ghost: {fileID: 7872479324776051326}
+  m_Ghost: {fileID: 5566517681654507246}
   m_Voice: {fileID: 7025300543588707201}
-  m_Footsteps: {fileID: 5438007216668105070}
+  m_Steps: {fileID: 5438007216668105070}
   m_Flick: {fileID: 8712634408959464779}
   m_Input: {fileID: 408289371547382750}
   m_Hit: {fileID: 1748105126704352588, guid: 673a3072975d44f6dad39a20b1e255dc, type: 3}

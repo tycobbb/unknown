@@ -1,4 +1,4 @@
-using System.Collections;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -16,25 +16,28 @@ public class Player: MonoBehaviour {
     [Tooltip("the move speed in percent per second")]
     [SerializeField] float m_MoveSpeed = 0.5f;
 
+    [Tooltip("the dash speed as a multiplier over time")]
+    [SerializeField] AnimationCurve m_DashCurve;
+
     // -- nodes --
     [Header("nodes")]
     [Tooltip("the player's line")]
     [SerializeField] Shapes.Line m_Line;
 
     [Tooltip("the player's hand")]
-    [SerializeField] Transform m_Hand;
+    [SerializeField] Shapes.Disc m_Hand;
 
     [Tooltip("the player's ghost trail")]
     [SerializeField] Shapes.Line m_Trail;
 
     [Tooltip("the player's ghost endpoint")]
-    [SerializeField] Transform m_Ghost;
+    [SerializeField] Shapes.Disc m_Ghost;
 
     [Tooltip("plays voice music")]
     [SerializeField] Musicker m_Voice;
 
     [Tooltip("plays footstep music")]
-    [SerializeField] Musicker m_Footsteps;
+    [SerializeField] Musicker m_Steps;
 
     [Tooltip("the input system input")]
     [SerializeField] PlayerFlick m_Flick;
@@ -58,8 +61,11 @@ public class Player: MonoBehaviour {
     /// the destination move angle [0...1]
     float m_PercentDest;
 
-    /// if the player is idle
-    bool m_IsMoving = false;
+    /// the move direction
+    Buffer<Vector2> m_MoveDir;
+
+    /// the dash speed multiplier
+    float m_DashAccel;
 
     /// the pattern's anchor index
     Draft<int> m_AnchorIndex = new Draft<int>(-1);
@@ -87,6 +93,7 @@ public class Player: MonoBehaviour {
         // set props
         m_Pattern = new Pattern();
         m_Actions = new PlayerActions(m_Input);
+        m_MoveDir = new Buffer<Vector2>(1);
 
         // set music
         m_VoiceLine = new Line(
@@ -116,12 +123,9 @@ public class Player: MonoBehaviour {
         Configure();
     }
 
-    void Update() {
+    void FixedUpdate() {
         // read input
         ReadMove();
-    }
-
-    void FixedUpdate() {
         // move line
         Move();
     }
@@ -142,10 +146,6 @@ public class Player: MonoBehaviour {
         // apply config
         m_Key = new Key(cfg.Key);
 
-        // grab shapes
-        var hand = m_Hand.GetComponent<Shapes.Disc>();
-        var ghost = m_Ghost.GetComponent<Shapes.Disc>();
-
         // decompose color
         var rgb = cfg.Color;
         var hsv = rgb.ToHsv();
@@ -157,16 +157,16 @@ public class Player: MonoBehaviour {
 
         // set colors
         m_Line.Color = fg;
+        m_Hand.Color = bg;
         m_Trail.Color = accent;
-        ghost.Color = bg;
-        hand.Color = bg;
+        m_Ghost.Color = bg;
 
         // size hand
-        hand.Radius = m_Hitbox.Radius;
+        m_Hand.Radius = m_Hitbox.Radius;
 
         // set music props
         m_Voice.Instrument = cfg.VoiceInstrument;
-        m_Footsteps.Instrument = cfg.FootstepsInstrument;
+        m_Steps.Instrument = cfg.FootstepsInstrument;
 
         // set initial position
         m_Pattern.MoveTo(cfg.Percent);
@@ -175,20 +175,64 @@ public class Player: MonoBehaviour {
         m_Score.AddPlayer(cfg);
     }
 
-    /// read move position
+    /// read move input
     void ReadMove() {
-        var mDir = m_Actions.Move;
+        var next = m_Actions.Move;
 
-        // check if idle
-        m_IsMoving = mDir != Vector2.zero;
+        // process input
+        ReadDash(next);
+        ReadDest(next);
 
-        // if so, stop moving
-        if (!m_IsMoving) {
+        // buffer dir
+        m_MoveDir.Add(next);
+    }
+
+    /// read a dash input
+    void ReadDash(Vector2 next) {
+        // unless were stopped
+        if (next == Vector2.zero) {
+            return;
+        }
+
+        // if we were idle
+        var isDash = !IsActive;
+
+        // or if direction changes
+        if (!isDash) {
+            foreach (var prev in m_MoveDir) {
+                var dot = Vector2.Dot(prev, next);
+                if (dot < 0.0f) {
+                    isDash = true;
+                    break;
+                }
+            }
+        }
+
+        // start the dash
+        if (isDash) {
+            m_DashAccel = 1.0f;
+
+            DOTween
+                .To(
+                    ( ) => m_DashAccel,
+                    (v) => m_DashAccel = v,
+                    0.0f,
+                    DashDuration
+                )
+                .SetEase(m_DashCurve);
+        }
+    }
+
+    /// read the destination input
+    void ReadDest(Vector2 next) {
+        // if inactive, stop moving
+        if (next == Vector2.zero) {
             m_PercentDest = m_Pattern.Percent;
         }
         // or, map the analog stick position to the pattern [0,1]
         else {
-            var angle = Vector2.SignedAngle(Vector2.down, mDir);
+            // calculate destination angle
+            var angle = Vector2.SignedAngle(Vector2.down, next);
             if (angle < 0.0) {
                 angle = Mathf.Abs(angle);
             } else {
@@ -216,11 +260,11 @@ public class Player: MonoBehaviour {
         SyncPosition(p0, p1, pe);
 
         // raise move pitch based on offset
-        m_Footsteps.SetPitch(1.0f + m_Flick.PitchShift);
+        m_Steps.SetPitch(1.0f + m_Flick.PitchShift);
 
         // play footsteps when moving
-        if (m_IsMoving != m_Footsteps.IsPlayingLoop) {
-            m_Footsteps.ToggleLoop(m_FootstepsLoop, m_IsMoving, m_Key);
+        if (IsActive != m_Steps.IsPlayingLoop) {
+            m_Steps.ToggleLoop(m_FootstepsLoop, IsActive, m_Key);
         }
     }
 
@@ -245,8 +289,11 @@ public class Player: MonoBehaviour {
             mDir = -mDir;
         }
 
-        // lerp the angle into the pattern
-        var pcti = pct0 + m_MoveSpeed * Time.deltaTime * mDir;
+        // adjust speed by dash
+        var spd = m_MoveSpeed * (1.0f + m_DashAccel);
+
+        // move by speed to get new pct
+        var pcti = pct0 + spd * Time.deltaTime * mDir;
 
         // if we overshot, snap to target
         if (Mathf.Sign(pct1 - pcti) != dDir) {
@@ -270,19 +317,19 @@ public class Player: MonoBehaviour {
         // move actual line
         m_Line.Start = p0;
         m_Line.End = pe;
-        m_Hand.localPosition = pe;
+        m_Hand.transform.localPosition = pe;
 
         // move ghost trail
         m_Trail.Start = p1;
         m_Trail.End = pe;
-        m_Ghost.localPosition = p1;
+        m_Ghost.transform.localPosition = p1;
     }
 
     /// trigger a hit
     void Hit(Player other) {
         // play the effect
         if (IsReleasing) {
-            var hit = Instantiate(m_Hit, m_Hand.position, Quaternion.identity).GetComponent<Hit>();
+            var hit = Instantiate(m_Hit, m_Hand.transform.position, Quaternion.identity).GetComponent<Hit>();
             hit.Play(m_Config, m_Hitbox.Radius);
         }
 
@@ -305,9 +352,19 @@ public class Player: MonoBehaviour {
         return m_Hitbox.Overlaps(other.m_Hitbox);
     }
 
+    /// if the player is active
+    bool IsActive {
+        get => m_MoveDir.Val != Vector2.zero;
+    }
+
     /// if this player is releasing
     bool IsReleasing {
         get => m_Flick.IsReleasing;
+    }
+
+    /// if this player is releasing
+    float DashDuration {
+        get => m_DashCurve.keys[m_DashCurve.length - 1].time;
     }
 
     // -- events --
