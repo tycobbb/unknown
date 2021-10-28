@@ -20,7 +20,6 @@ public class PlayerHitStop: MonoBehaviour {
 
     /// play hitstop effect
     IEnumerator PlayAsync(float mag) {
-        Debug.Log($"mag {mag}");
         var duration = m_DurationCurve.Evaluate(mag);
 
         m_IsActive = true;

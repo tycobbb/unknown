@@ -3,6 +3,10 @@ using UnityEngine.InputSystem;
 
 /// the player's flick gesture
 public class PlayerFlick: MonoBehaviour {
+    // -- constants --
+    /// when there is no release
+    const int c_ReleaseNone = -1;
+
     // -- tuning --
     [Header("tuning")]
     [Tooltip("the max length of the flick windup")]
@@ -36,23 +40,20 @@ public class PlayerFlick: MonoBehaviour {
     Vector2 m_Offset;
 
     /// the target offset
-    Vector2 m_DestOffset;
+    Vector2 m_DstOffset;
 
     /// the player's inputs
     PlayerActions m_Actions;
 
     // -- p/release
     /// the current frame
-    int? m_ReleaseFrame;
+    int m_ReleaseFrame;
 
     /// the time on release
     float m_ReleaseTime;
 
     /// the initial release offset
-    Vector2 m_ReleaseInitial;
-
-    /// the release offset
-    Vector2 m_ReleaseOffset;
+    Vector2 m_ReleaseSrc;
 
     /// the strength of the release
     float m_ReleaseStrength;
@@ -71,19 +72,22 @@ public class PlayerFlick: MonoBehaviour {
         Read();
 
         // move flick
-        Move();
-        TryRelease();
+        if (IsReleasing) {
+            Release();
+        } else {
+            Move();
+        }
     }
 
     // -- commands --
     /// read flick
     void Read() {
         // capture prev and next offset
-        var prev = m_DestOffset;
+        var prev = m_DstOffset;
         var next = m_Actions.Flick;
 
         // update state
-        m_DestOffset = next;
+        m_DstOffset = next;
 
         // read a release gesture
         ReadRelease(prev, next);
@@ -109,7 +113,7 @@ public class PlayerFlick: MonoBehaviour {
         if (!IsReleasing) {
             m_ReleaseFrame = 0;
             m_ReleaseTime = Time.time;
-            m_ReleaseInitial = prev;
+            m_ReleaseSrc = prev;
             m_ReleaseStrength = 0.0f;
         }
 
@@ -124,17 +128,22 @@ public class PlayerFlick: MonoBehaviour {
             return;
         }
 
+        // if there is any move to make
+        if (m_Offset == m_DstOffset) {
+            return;
+        }
+
         // given direction to target
-        var dest = m_DestOffset;
-        var prev = m_Offset;
-        var pdir = Vec2.Normalize(dest - prev);
+        var curr = m_Offset;
+        var dest = m_DstOffset;
+        var cDir = Vec2.Normalize(dest - curr);
 
         // move offset towards it
-        var next = prev + pdir * m_Speed * Time.time;
+        var next = curr + cDir * m_Speed * Time.deltaTime;
 
         // snap if we overshot
-        var ndir = dest - next;
-        if (Vector2.Dot(pdir, ndir) < 0.0f) {
+        var nDir = dest - next;
+        if (Vector2.Dot(cDir, nDir) < 0.0f) {
             next = dest;
         }
 
@@ -143,7 +152,7 @@ public class PlayerFlick: MonoBehaviour {
     }
 
     /// release the flick, if necessary, modifying the offset
-    void TryRelease() {
+    void Release() {
         // if not in hitstop
         if (m_HitStop.IsActive) {
             return;
@@ -170,28 +179,28 @@ public class PlayerFlick: MonoBehaviour {
         }
 
         // calculate the next offset
-        var prev = m_ReleaseOffset;
-        var next = Vector2.LerpUnclamped(m_ReleaseInitial, Vector2.zero, pct);
+        var curr = m_Offset;
+        var next = Vector2.LerpUnclamped(m_ReleaseSrc, Vector2.zero, pct);
 
         // track the offset and speed
-        m_ReleaseOffset = next;
-        m_ReleaseSpeed = Vector2.Distance(prev, next) / Time.deltaTime;
+        m_Offset = next;
+        m_ReleaseSpeed = Vector2.Distance(curr, next) / Time.deltaTime;
     }
 
     /// cancels an active release, if any
     public void Cancel() {
-        m_ReleaseFrame = null;
+        m_ReleaseFrame = c_ReleaseNone;
     }
 
     // -- queries --
     /// find current scaled offset
     public Vector2 Offset {
-        get => RawOffset * m_Scale;
+        get => m_Offset * m_Scale;
     }
 
     /// the current pitch shift
     public float PitchShift {
-        get => RawOffset.magnitude * m_PitchScale;
+        get => m_Offset.magnitude * m_PitchScale;
     }
 
     /// the current release speed
@@ -201,16 +210,11 @@ public class PlayerFlick: MonoBehaviour {
 
     /// if the release gesture is active
     public bool IsReleasing {
-        get => m_ReleaseFrame > -1;
+        get => m_ReleaseFrame != c_ReleaseNone;
     }
 
     /// if the release gesture is frame locked
     bool IsReleaseLocked {
         get => m_ReleaseFrame > 1;
-    }
-
-    /// the current unscaled offset, depending on state
-    Vector2 RawOffset {
-        get => IsReleasing ? m_ReleaseOffset : m_Offset;
     }
 }

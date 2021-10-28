@@ -334,7 +334,6 @@ public class Player: MonoBehaviour {
         // if at least one player is attacking
         var isAttacker = IsReleasing;
         var isAttacked = other.IsReleasing;
-
         if (!isAttacker && !isAttacked) {
             return;
         }

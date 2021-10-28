@@ -364,7 +364,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Scale: 0.2
-  m_Speed: 0.01
+  m_Speed: 8
   m_PitchScale: 0.33333334
   m_ReleaseCurve:
     serializedVersion: 2
