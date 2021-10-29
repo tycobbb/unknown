@@ -3,25 +3,33 @@ using UnityEngine;
 
 /// the params for a linear equation
 [Serializable]
-public struct Linear {
+public struct Linear<T> {
     // -- props --
     [Tooltip("the destination value.")]
-    public float Value;
+    public T Value;
 
-    /// the time value, interpretable in a variety of ways
-    [Tooltip("the time value. interpretation is context-dependent.")]
+    [Tooltip("a scale. interpretation is context-dependent.")]
     public float Scale;
 
     // -- lifetime --
     /// create a new linear value
-    public Linear(float val, float scale) {
+    public Linear(T val, float scale) {
         Value = val;
         Scale = scale;
     }
 
     // -- factories --
     /// creates a "zero" value
-    public static Linear Zero {
-        get => new Linear(0.0f, 0.0f);
+    public static Linear<T> Zero {
+        get => new Linear<T>(default, 0.0f);
+    }
+}
+
+public static class LinearExt {
+    public static Linear<float> Mul(this Linear<float> curr, float val, float scale) {
+        var next = curr;
+        next.Value *= val;
+        next.Scale *= scale;
+        return next;
     }
 }

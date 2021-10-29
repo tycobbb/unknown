@@ -1,4 +1,3 @@
-using System.Collections;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -20,9 +19,12 @@ public class Player: MonoBehaviour {
     [Tooltip("the dash speed as a multiplier over time")]
     [SerializeField] AnimationCurve m_DashCurve;
 
+    [Tooltip("the scale of the hand on hit")]
+    [SerializeField] Linear<float> m_HitHandScale;
+
     // -- nodes --
     [Header("nodes")]
-    [Tooltip("the player's line")]
+    [Tooltip("the player's linGe")]
     [SerializeField] Shapes.Line m_Line;
 
     [Tooltip("the player's hand")]
@@ -67,6 +69,12 @@ public class Player: MonoBehaviour {
 
     /// the dash speed multiplier
     float m_DashAccel;
+
+    /// the time of the last hit
+    float m_HitTime;
+
+    /// the hand tween on hit
+    Tweener m_HitHandTween;
 
     /// the pattern's anchor index
     Draft<int> m_AnchorIndex = new Draft<int>(-1);
@@ -313,6 +321,12 @@ public class Player: MonoBehaviour {
         }
     }
 
+    void TryHit() {
+        var r0 = m_Hand.Radius;
+        var r1 = r0 * m_HitHandScale.Scale;
+        m_Hand.Radius = Mathf.Lerp(r0, r1, Mathf.Clamp01((Time.time - m_HitTime) / m_HitTime));
+    }
+
     /// sync player position
     void SyncPosition(Vector2 p0, Vector2 p1, Vector2 pe) {
         // move hitbox
@@ -345,13 +359,15 @@ public class Player: MonoBehaviour {
         var mag = m_Flick.Speed;
         m_HitStop.Play(mag);
 
-        // play hit effect
+        // play hit effects
         if (isAttacker) {
             Hit.Play(
                 m_Config,
                 m_Hand.transform.position,
                 m_Hitbox.Radius
             );
+
+            PlayHitTweens();
         }
 
         // play the chord
@@ -365,6 +381,25 @@ public class Player: MonoBehaviour {
         if (isAttacker) {
             m_Score.RecordHit(m_Config, mag);
         }
+    }
+
+    /// play a new hand scale tween to play on hit
+    void PlayHitTweens() {
+        // get start and end radius
+        var r0 = m_Hand.Radius;
+        var r1 = m_HitHandScale.Mul(r0, 0.5f);
+
+        // get lens
+        var radius = new Lens<float>(
+            ( ) => m_Hand.Radius,
+            (v) => m_Hand.Radius = v
+        );
+
+        // create tween
+        radius
+            .TweenTo(r0, r1)
+            .SetLoops(2, LoopType.Yoyo)
+            .SetEase(Ease.InOutCubic);
     }
 
     // -- queries --
@@ -387,6 +422,7 @@ public class Player: MonoBehaviour {
     float DashDuration {
         get => m_DashCurve.keys[m_DashCurve.length - 1].time;
     }
+
 
     // -- events --
     /// when two players collide
