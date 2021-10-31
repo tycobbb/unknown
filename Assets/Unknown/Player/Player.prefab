@@ -272,6 +272,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4562596083273999881}
   - component: {fileID: 4562596083273999882}
+  - component: {fileID: 3619973663402455770}
   - component: {fileID: 8712634408959464779}
   - component: {fileID: -204485158798143468}
   - component: {fileID: 7025300543588707201}
@@ -317,6 +318,31 @@ MonoBehaviour:
   m_Hitbox:
     Position: {x: 0, y: 0}
     Radius: 0.025
+  m_HitHandScale:
+    Value: 1.3
+    Scale: 0.15
+  m_Move: {fileID: 3619973663402455770}
+  m_Flick: {fileID: 8712634408959464779}
+  m_HitStop: {fileID: -204485158798143468}
+  m_Line: {fileID: 3898287554920713603}
+  m_Hand: {fileID: 6400796380260406308}
+  m_Trail: {fileID: 2980957337658543330}
+  m_Ghost: {fileID: 5566517681654507246}
+  m_Voice: {fileID: 7025300543588707201}
+  m_Steps: {fileID: 5438007216668105070}
+  m_Input: {fileID: 408289371547382750}
+--- !u!114 &3619973663402455770
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4562596083273999880}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 434d06263e83d48178b24e87690b3153, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
   m_MoveSpeed: 0.3
   m_DashCurve:
     serializedVersion: 2
@@ -342,17 +368,6 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  m_HitHandScale:
-    Value: 1.3
-    Scale: 0.15
-  m_Line: {fileID: 3898287554920713603}
-  m_Hand: {fileID: 6400796380260406308}
-  m_Trail: {fileID: 2980957337658543330}
-  m_Ghost: {fileID: 5566517681654507246}
-  m_Voice: {fileID: 7025300543588707201}
-  m_Steps: {fileID: 5438007216668105070}
-  m_Flick: {fileID: 8712634408959464779}
-  m_HitStop: {fileID: -204485158798143468}
   m_Input: {fileID: 408289371547382750}
 --- !u!114 &8712634408959464779
 MonoBehaviour:

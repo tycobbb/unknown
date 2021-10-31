@@ -27,11 +27,13 @@ public class PlayerFlick: MonoBehaviour {
     [Tooltip("the min alignment to detect a flick release")]
     [SerializeField] float m_ReleaseAlignment = 0.1f;
 
-    // -- nodes --
-    [Header("nodes")]
+    // -- parts --
+    [Header("parts")]
     [Tooltip("the hitstop")]
     [SerializeField] PlayerHitStop m_HitStop;
 
+    // -- nodes --
+    [Header("nodes")]
     [Tooltip("the input system input")]
     [SerializeField] PlayerInput m_Input;
 
@@ -42,8 +44,8 @@ public class PlayerFlick: MonoBehaviour {
     /// the target offset
     Vector2 m_DstOffset;
 
-    /// the player's inputs
-    PlayerActions m_Actions;
+    /// the input action
+    InputAction m_Action;
 
     // -- p/release
     /// the current frame
@@ -64,27 +66,15 @@ public class PlayerFlick: MonoBehaviour {
     // -- lifecycle --
     void Awake() {
         // set props
-        m_Actions = new PlayerActions(m_Input);
-    }
-
-    void FixedUpdate() {
-        // read input
-        Read();
-
-        // move flick
-        if (IsReleasing) {
-            Release();
-        } else {
-            Move();
-        }
+        m_Action = m_Input.currentActionMap["Flick"];
     }
 
     // -- commands --
     /// read flick
-    void Read() {
+    public void Read() {
         // capture prev and next offset
         var prev = m_DstOffset;
-        var next = m_Actions.Flick;
+        var next = m_Action.ReadValue<Vector2>();
 
         // update state
         m_DstOffset = next;
@@ -121,13 +111,17 @@ public class PlayerFlick: MonoBehaviour {
         m_ReleaseStrength = Mathf.Max(m_ReleaseStrength, delta.magnitude);
     }
 
+    /// move the flick into its new position
+    public void Play() {
+        if (IsReleasing) {
+            Release();
+        } else {
+            Move();
+        }
+    }
+
     /// move the flick towards its target position
     void Move() {
-        // if not in hitstop
-        if (m_HitStop.IsActive) {
-            return;
-        }
-
         // if there is any move to make
         if (m_Offset == m_DstOffset) {
             return;
@@ -153,11 +147,6 @@ public class PlayerFlick: MonoBehaviour {
 
     /// release the flick, if necessary, modifying the offset
     void Release() {
-        // if not in hitstop
-        if (m_HitStop.IsActive) {
-            return;
-        }
-
         // if not releasing
         if (!IsReleasing) {
             return;

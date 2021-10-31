@@ -13,14 +13,19 @@ public class Player: MonoBehaviour {
     [Tooltip("the hitbox at the end of the line")]
     [SerializeField] PlayerHitbox m_Hitbox;
 
-    [Tooltip("the move speed in percent per second")]
-    [SerializeField] float m_MoveSpeed = 0.5f;
-
-    [Tooltip("the dash speed as a multiplier over time")]
-    [SerializeField] AnimationCurve m_DashCurve;
-
     [Tooltip("the scale of the hand on hit")]
     [SerializeField] Linear<float> m_HitHandScale;
+
+    // -- parts --
+    [Header("parts")]
+    [Tooltip("the move action")]
+    [SerializeField] PlayerMove m_Move;
+
+    [Tooltip("the flick action")]
+    [SerializeField] PlayerFlick m_Flick;
+
+    [Tooltip("the hitstop")]
+    [SerializeField] PlayerHitStop m_HitStop;
 
     // -- nodes --
     [Header("nodes")]
@@ -42,12 +47,6 @@ public class Player: MonoBehaviour {
     [Tooltip("plays footstep music")]
     [SerializeField] Musicker m_Steps;
 
-    [Tooltip("the flick action")]
-    [SerializeField] PlayerFlick m_Flick;
-
-    [Tooltip("the hitstop")]
-    [SerializeField] PlayerHitStop m_HitStop;
-
     [Tooltip("the input system input")]
     [SerializeField] PlayerInput m_Input;
 
@@ -58,26 +57,8 @@ public class Player: MonoBehaviour {
     /// the musical key
     Key m_Key;
 
-    /// the line pattern
-    Pattern m_Pattern;
-
-    /// the destination move angle [0...1]
-    float m_PercentDest;
-
-    /// the move direction
-    Buffer<Vector2> m_MoveDir;
-
-    /// the dash speed multiplier
-    float m_DashAccel;
-
-    /// the time of the last hit
-    float m_HitTime;
-
     /// the hand tween on hit
     Tweener m_HitHandTween;
-
-    /// the pattern's anchor index
-    Draft<int> m_AnchorIndex = new Draft<int>(-1);
 
     /// a line as the player's anchor changes
     Line m_VoiceLine;
@@ -91,18 +72,10 @@ public class Player: MonoBehaviour {
     /// a chord on getting hit
     Chord m_HurtChord;
 
-    /// the player's inputs
-    PlayerActions m_Actions;
-
     // -- lifecycle --
     void Awake() {
         // set deps
         m_Score = Score.Get;
-
-        // set props
-        m_Pattern = new Pattern();
-        m_Actions = new PlayerActions(m_Input);
-        m_MoveDir = new Buffer<Vector2>(1);
 
         // set music
         m_VoiceLine = new Line(
@@ -134,9 +107,9 @@ public class Player: MonoBehaviour {
 
     void FixedUpdate() {
         // read input
-        ReadMove();
+        Read();
 
-        // move line
+        // move into position
         Move();
     }
 
@@ -179,78 +152,16 @@ public class Player: MonoBehaviour {
         m_Steps.Instrument = cfg.FootstepsInstrument;
 
         // set initial position
-        m_Pattern.MoveTo(cfg.Percent);
+        m_Move.Configure(cfg);
 
         // show score
         m_Score.AddPlayer(cfg);
     }
 
-    /// read move input
-    void ReadMove() {
-        var next = m_Actions.Move;
-
-        // process input
-        ReadDash(next);
-        ReadDest(next);
-
-        // buffer dir
-        m_MoveDir.Add(next);
-    }
-
-    /// read a dash input
-    void ReadDash(Vector2 next) {
-        // unless were stopped
-        if (next == Vector2.zero) {
-            return;
-        }
-
-        // if we were idle
-        var isDash = !IsActive;
-
-        // or if direction changes
-        if (!isDash) {
-            foreach (var prev in m_MoveDir) {
-                var dot = Vector2.Dot(prev, next);
-                if (dot < 0.0f) {
-                    isDash = true;
-                    break;
-                }
-            }
-        }
-
-        // start the dash
-        if (isDash) {
-            m_DashAccel = 1.0f;
-
-            DOTween
-                .To(
-                    ( ) => m_DashAccel,
-                    (v) => m_DashAccel = v,
-                    0.0f,
-                    DashDuration
-                )
-                .SetEase(m_DashCurve);
-        }
-    }
-
-    /// read the destination input
-    void ReadDest(Vector2 next) {
-        // if inactive, stop moving
-        if (next == Vector2.zero) {
-            m_PercentDest = m_Pattern.Percent;
-        }
-        // or, map the analog stick position to the pattern [0,1]
-        else {
-            // calculate destination angle
-            var angle = Vector2.SignedAngle(Vector2.down, next);
-            if (angle < 0.0) {
-                angle = Mathf.Abs(angle);
-            } else {
-                angle = 360.0f - angle;
-            }
-
-            m_PercentDest = angle / 360.0f;
-        }
+    /// read input
+    void Read() {
+        m_Move.Read();
+        m_Flick.Read();
     }
 
     /// move line into position
@@ -260,12 +171,13 @@ public class Player: MonoBehaviour {
             return;
         }
 
-        // move the pattern
-        MovePattern();
+        // play actions
+        m_Move.Play();
+        m_Flick.Play();
 
         // get pattern pos
-        var p0 = m_Pattern.Point0;
-        var p1 = m_Pattern.Point1;
+        var p0 = m_Move.Point;
+        var p1 = m_Move.Point + Vector2.right * 0.1f;
         var pe = p1 + m_Flick.Offset;
 
         // move to the new positions
@@ -275,56 +187,16 @@ public class Player: MonoBehaviour {
         m_Steps.SetPitch(1.0f + m_Flick.PitchShift);
 
         // play footsteps when moving
-        if (IsActive != m_Steps.IsPlayingLoop) {
-            m_Steps.ToggleLoop(m_FootstepsLoop, IsActive, m_Key);
-        }
-    }
-
-    /// move the pattern to new percent
-    void MovePattern() {
-        // check the distance to our destination
-        var pct0 = m_Pattern.Percent;
-        var pct1 = m_PercentDest;
-        var dist = pct1 - pct0;
-
-        // if there is anywhere to move
-        if (dist == 0.0f || dist == 1.0f) {
-            return;
+        var isActive = m_Move.IsActive;
+        if (isActive != m_Steps.IsPlayingLoop) {
+            m_Steps.ToggleLoop(m_FootstepsLoop, isActive, m_Key);
         }
 
-        // find the dir to destination
-        var dDir = Mathf.Sign(dist);
-
-        // but move in the shortest path
-        var mDir = dDir;
-        if (Mathf.Abs(dist) > 0.5f) {
-            mDir = -mDir;
+        // play voice when corner changes
+        var corner = m_Move.Corner;
+        if (corner.IsDirty) {
+            m_Voice.PlayTone(m_VoiceLine[corner.Val], m_Key);
         }
-
-        // adjust speed by dash
-        var spd = m_MoveSpeed * (1.0f + m_DashAccel);
-
-        // move by speed to get new pct
-        var pcti = pct0 + spd * Time.deltaTime * mDir;
-
-        // if we overshot, snap to target
-        if (Mathf.Sign(pct1 - pcti) != dDir) {
-            pcti = pct1;
-        }
-
-        m_Pattern.MoveTo(pcti);
-
-        // play voice when anchor changes
-        var i = m_AnchorIndex.Val = m_Pattern.AnchorIndex;
-        if (m_AnchorIndex.IsDirty) {
-            m_Voice.PlayTone(m_VoiceLine[i], m_Key);
-        }
-    }
-
-    void TryHit() {
-        var r0 = m_Hand.Radius;
-        var r1 = r0 * m_HitHandScale.Scale;
-        m_Hand.Radius = Mathf.Lerp(r0, r1, Mathf.Clamp01((Time.time - m_HitTime) / m_HitTime));
     }
 
     /// sync player position
@@ -346,8 +218,8 @@ public class Player: MonoBehaviour {
     /// trigger a collision
     void HitPlayer(Player other) {
         // if at least one player is attacking
-        var isAttacker = IsReleasing;
-        var isAttacked = other.IsReleasing;
+        var isAttacker = IsAttacking;
+        var isAttacked = other.IsAttacking;
         if (!isAttacker && !isAttacked) {
             return;
         }
@@ -403,28 +275,17 @@ public class Player: MonoBehaviour {
     }
 
     // -- queries --
+    /// if this player is releasing
+    bool IsAttacking {
+        get => m_Flick.IsReleasing;
+    }
+
+    // -- collision --
     /// check if the player's overlap
     public bool Overlaps(Player other) {
         return m_Hitbox.Overlaps(other.m_Hitbox);
     }
 
-    /// if the player is active
-    bool IsActive {
-        get => m_MoveDir.Val != Vector2.zero;
-    }
-
-    /// if this player is releasing
-    bool IsReleasing {
-        get => m_Flick.IsReleasing;
-    }
-
-    /// if this player is releasing
-    float DashDuration {
-        get => m_DashCurve.keys[m_DashCurve.length - 1].time;
-    }
-
-
-    // -- events --
     /// when two players collide
     public void OnCollision(Player other) {
         HitPlayer(other);
