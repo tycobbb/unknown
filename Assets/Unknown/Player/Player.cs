@@ -102,14 +102,14 @@ public class Player: MonoBehaviour {
         );
 
         // apply config
-        Configure();
+        Init();
     }
 
     void FixedUpdate() {
         // read input
         Read();
 
-        // move into position
+        // apply movement
         Move();
     }
 
@@ -123,7 +123,7 @@ public class Player: MonoBehaviour {
     }
 
     /// apply player config
-    void Configure() {
+    void Init() {
         var cfg = m_Config;
 
         // apply config
@@ -152,7 +152,8 @@ public class Player: MonoBehaviour {
         m_Steps.Instrument = cfg.FootstepsInstrument;
 
         // set initial position
-        m_Move.Configure(cfg);
+        m_Move.Init(cfg);
+        m_Flick.Init(m_Move.Pos + Vector2.right * 0.5f);
 
         // show score
         m_Score.AddPlayer(cfg);
@@ -175,13 +176,8 @@ public class Player: MonoBehaviour {
         m_Move.Play();
         m_Flick.Play();
 
-        // get pattern pos
-        var p0 = m_Move.Point;
-        var p1 = m_Move.Point + Vector2.right * 0.1f;
-        var pe = p1 + m_Flick.Offset;
-
-        // move to the new positions
-        SyncPosition(p0, p1, pe);
+        // move to new positions
+        SyncPos();
 
         // raise move pitch based on offset
         m_Steps.SetPitch(1.0f + m_Flick.PitchShift);
@@ -200,7 +196,12 @@ public class Player: MonoBehaviour {
     }
 
     /// sync player position
-    void SyncPosition(Vector2 p0, Vector2 p1, Vector2 pe) {
+    void SyncPos() {
+        // get state
+        var p0 = m_Move.Pos;
+        var p1 = m_Flick.Pos;
+        var pe = m_Flick.Offset;
+
         // move hitbox
         m_Hitbox.Position = pe;
 
@@ -224,12 +225,11 @@ public class Player: MonoBehaviour {
             return;
         }
 
-        // cancel any active release
-        m_Flick.Cancel();
+        // finish any active release
+        m_Flick.Finish();
 
         // play hitstop effect
-        var mag = m_Flick.Speed;
-        m_HitStop.Play(mag);
+        m_HitStop.Play(m_Flick.Speed);
 
         // play hit effects
         if (isAttacker) {
@@ -251,7 +251,7 @@ public class Player: MonoBehaviour {
 
         // record the hit
         if (isAttacker) {
-            m_Score.RecordHit(m_Config, mag);
+            m_Score.RecordHit(m_Config, m_Flick.Speed);
         }
     }
 

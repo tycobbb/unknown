@@ -27,17 +27,15 @@ public class PlayerFlick: MonoBehaviour {
     [Tooltip("the min alignment to detect a flick release")]
     [SerializeField] float m_ReleaseAlignment = 0.1f;
 
-    // -- parts --
-    [Header("parts")]
-    [Tooltip("the hitstop")]
-    [SerializeField] PlayerHitStop m_HitStop;
-
     // -- nodes --
     [Header("nodes")]
     [Tooltip("the input system input")]
     [SerializeField] PlayerInput m_Input;
 
     // -- props --
+    /// the current position
+    Vector2 m_Pos;
+
     /// the current offset
     Vector2 m_Offset;
 
@@ -70,6 +68,11 @@ public class PlayerFlick: MonoBehaviour {
     }
 
     // -- commands --
+    public void Init(Vector2 pos) {
+        // set initial position
+        m_Pos = pos;
+    }
+
     /// read flick
     public void Read() {
         // capture prev and next offset
@@ -157,7 +160,7 @@ public class PlayerFlick: MonoBehaviour {
 
         // if the release finished, clear it
         if (pct >= 1.0f) {
-            Cancel();
+            Finish();
             return;
         }
 
@@ -176,15 +179,22 @@ public class PlayerFlick: MonoBehaviour {
         m_ReleaseSpeed = Vector2.Distance(curr, next) / Time.deltaTime;
     }
 
-    /// cancels an active release, if any
-    public void Cancel() {
+    /// finish the active release, if any
+    public void Finish() {
+        m_Pos = Offset;
+        m_Offset = Vector2.zero;
         m_ReleaseFrame = c_ReleaseNone;
     }
 
     // -- queries --
-    /// find current scaled offset
+    /// find current position
+    public Vector2 Pos {
+        get => m_Pos;
+    }
+
+    /// the offset position
     public Vector2 Offset {
-        get => m_Offset * m_Scale;
+        get => m_Pos + m_Offset * m_Scale;
     }
 
     /// the current pitch shift

@@ -28,11 +28,11 @@ public class PlayerMove: MonoBehaviour {
     /// the destination angle
     float m_DstPercent;
 
-    /// the point
-    Vector2 m_Point;
+    /// the current position
+    Vector2 m_Pos;
 
     /// the move direction
-    Buffer<Vector2> m_MoveDir;
+    Buffer<Vector2> m_Dir;
 
     /// the dash speed multiplier
     float m_DashAccel;
@@ -47,12 +47,12 @@ public class PlayerMove: MonoBehaviour {
     void Awake() {
         // set props
         m_Action = m_Input.currentActionMap["Move"];
-        m_MoveDir = new Buffer<Vector2>(1);
+        m_Dir = new Buffer<Vector2>(1);
     }
 
     // -- commands --
     /// apply the configuration
-    public void Configure(PlayerConfig cfg) {
+    public void Init(PlayerConfig cfg) {
         Move(cfg.Percent);
     }
 
@@ -65,7 +65,7 @@ public class PlayerMove: MonoBehaviour {
         ReadDest(next);
 
         // buffer dir
-        m_MoveDir.Add(next);
+        m_Dir.Add(next);
     }
 
     /// read a dash input
@@ -80,7 +80,7 @@ public class PlayerMove: MonoBehaviour {
 
         // or if direction changes
         if (!isDash) {
-            foreach (var prev in m_MoveDir) {
+            foreach (var prev in m_Dir) {
                 var dot = Vector2.Dot(prev, next);
                 if (dot < 0.0f) {
                     isDash = true;
@@ -174,7 +174,7 @@ public class PlayerMove: MonoBehaviour {
         p.y = CalcDimension(pct + 1.625f);
 
         // update state
-        m_Point = p;
+        m_Pos = p;
         m_Percent = pct;
         m_Corner.Val = Mathf.Min(Mathf.FloorToInt(pct / 0.25f), 3);
     }
@@ -186,9 +186,9 @@ public class PlayerMove: MonoBehaviour {
     }
 
     // -- queries --
-    /// the point
-    public Vector2 Point {
-        get => m_Point;
+    /// the current position
+    public Vector2 Pos {
+        get => m_Pos;
     }
 
     /// the current corner index
@@ -198,6 +198,6 @@ public class PlayerMove: MonoBehaviour {
 
     /// if the move is active
     public bool IsActive {
-        get => m_MoveDir.Val != Vector2.zero;
+        get => m_Dir.Val != Vector2.zero;
     }
 }
