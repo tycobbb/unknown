@@ -68,9 +68,9 @@ public class PlayerFlick: MonoBehaviour {
     }
 
     // -- commands --
-    public void Init(Vector2 pos) {
+    public void Init(PlayerConfig cfg, Vector2 p0) {
         // set initial position
-        m_Pos = pos;
+        m_Pos = p0 + cfg.Direction * 0.5f;
     }
 
     /// read flick
@@ -205,6 +205,11 @@ public class PlayerFlick: MonoBehaviour {
     /// the current release speed
     public float Speed {
         get => m_ReleaseSpeed;
+    }
+
+    /// if the flick is active
+    public bool IsActive {
+        get => m_Offset != Vector2.zero;
     }
 
     /// if the release gesture is active

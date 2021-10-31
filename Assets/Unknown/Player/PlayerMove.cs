@@ -1,3 +1,4 @@
+using System.Collections;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -6,7 +7,7 @@ using UnityEngine.InputSystem;
 public class PlayerMove: MonoBehaviour {
     // -- statics --
     /// the direction when pct is zero
-    public static Vector2 DirZero = new Vector2(-1.0f, -1.0f);
+    static Vector2 s_DirZero = new Vector2(-1.0f, -1.0f);
 
     // -- tuning --
     [Header("tuning")]
@@ -38,7 +39,7 @@ public class PlayerMove: MonoBehaviour {
     float m_DashAccel;
 
     /// the pattern's corner index
-    Draft<int> m_Corner = new Draft<int>(-1);
+    int? m_Corner;
 
     /// the player's inputs
     InputAction m_Action;
@@ -53,7 +54,11 @@ public class PlayerMove: MonoBehaviour {
     // -- commands --
     /// apply the configuration
     public void Init(PlayerConfig cfg) {
-        Move(cfg.Percent);
+        // set initial pos
+        SetPos(cfg.Percent);
+
+        // set initial corner
+        m_Corner = FindCorner(cfg.Percent);
     }
 
     /// read move input
@@ -116,7 +121,7 @@ public class PlayerMove: MonoBehaviour {
         // or, map the analog stick position to the pattern [0,1]
         else {
             // calculate destination angle
-            var angle = Vector2.SignedAngle(PlayerMove.DirZero, next);
+            var angle = Vector2.SignedAngle(s_DirZero, next);
             if (angle < 0.0) {
                 angle = Mathf.Abs(angle);
             } else {
@@ -129,60 +134,91 @@ public class PlayerMove: MonoBehaviour {
 
     /// move into position
     public void Play() {
-        // check the distance to our destination
+        // check the distance to the destination
         var pct0 = m_Percent;
-        var pct1 = m_DstPercent;
-        var dist = pct1 - pct0;
+        var pctD = m_DstPercent;
+        var dist = pctD - pct0;
 
         // if there is anywhere to move
-        if (dist == 0.0f || dist == 1.0f) {
-            return;
+        if (dist != 0.0f && dist != 1.0f) {
+            Move();
         }
 
+        // set the new corner
+        SetCorner(pct0);
+    }
+
+    /// move towards the destination percent
+    void Move() {
+        // check the distance to our destination
+        var pct0 = m_Percent;
+        var pctD = m_DstPercent;
+        var dist = pctD - pct0;
+
         // find the dir to destination
-        var dDir = Mathf.Sign(dist);
+        var dirD = Mathf.Sign(dist);
 
         // but move in the shortest path
-        var mDir = dDir;
+        var dirM = dirD;
         if (Mathf.Abs(dist) > 0.5f) {
-            mDir = -mDir;
+            dirM = -dirM;
         }
 
         // adjust speed by dash
         var spd = m_Speed * (1.0f + m_DashAccel);
 
         // move by speed to get new pct
-        var pcti = pct0 + spd * Time.deltaTime * mDir;
+        var pct1 = pct0 + spd * Time.deltaTime * dirM;
 
         // if we overshot, snap to target
-        if (Mathf.Sign(pct1 - pcti) != dDir) {
-            pcti = pct1;
+        if (Mathf.Sign(pctD - pct1) != dirD) {
+            pct1 = pctD;
         }
 
-        // move to the percent
-        Move(pcti);
+        // set the new position
+        SetPos(pct1);
     }
 
-    /// move to the percent
-    void Move(float pct) {
+    /// set the current percent
+    void SetPos(float pct) {
         // loop pct in [0,1]
-        pct = Mathf.Repeat(pct, 1.0f);
+        var pct1 = Mathf.Repeat(pct, 1.0f);
 
         // move point
         Vector2 p;
-        p.x = CalcDimension(pct + 1.375f);
-        p.y = CalcDimension(pct + 1.625f);
+        p.x = Calc(pct1 + 1.375f);
+        p.y = Calc(pct1 + 1.625f);
 
         // update state
         m_Pos = p;
-        m_Percent = pct;
-        m_Corner.Val = Mathf.Min(Mathf.FloorToInt(pct / 0.25f), 3);
+        m_Percent = pct1;
+
+        // calc a dimension of the point; a clipped triangle wave, e.g. _/‾\_/‾
+        float Calc(float pct) {
+            return Mathf.Clamp01(Mathf.Abs(4.0f * (Mathf.Repeat(pct, 2.0f) - 1.0f)) - 2.5f);
+        }
     }
 
-    // -- c/helpers
-    /// calc a dimension of the point
-    float CalcDimension(float pct) {
-        return Mathf.Clamp01(Mathf.Abs(4.0f * (Mathf.Repeat(pct, 2.0f) - 1.0f)) - 2.5f);
+    /// sync our current corner
+    void SetCorner(float pct0) {
+        var pct1 = m_Percent;
+
+        // default to no corner
+        var ci = null as int?;
+
+        // if we moved
+        if (pct0 != pct1) {
+            var c0 = FindCorner(pct0);
+            var c1 = FindCorner(pct1);
+
+            // and the corner changed
+            if (c0 != c1) {
+                ci = c1;
+            }
+        }
+
+        // update state
+        m_Corner = ci;
     }
 
     // -- queries --
@@ -192,12 +228,17 @@ public class PlayerMove: MonoBehaviour {
     }
 
     /// the current corner index
-    public Draft<int> Corner {
+    public int? Corner {
         get => m_Corner;
     }
 
     /// if the move is active
     public bool IsActive {
         get => m_Dir.Val != Vector2.zero;
+    }
+
+    /// get the corner for a percent
+    int FindCorner(float pct) {
+        return Mathf.FloorToInt(pct * 4.0f);
     }
 }

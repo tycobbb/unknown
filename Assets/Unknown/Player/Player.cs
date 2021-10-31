@@ -1,3 +1,4 @@
+using System.Collections;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -16,6 +17,9 @@ public class Player: MonoBehaviour {
     [Tooltip("the scale of the hand on hit")]
     [SerializeField] Linear<float> m_HitHandScale;
 
+    [Tooltip("the hitstop duration curve")]
+    [SerializeField] AnimationCurve m_HitStopDuration;
+
     // -- parts --
     [Header("parts")]
     [Tooltip("the move action")]
@@ -23,9 +27,6 @@ public class Player: MonoBehaviour {
 
     [Tooltip("the flick action")]
     [SerializeField] PlayerFlick m_Flick;
-
-    [Tooltip("the hitstop")]
-    [SerializeField] PlayerHitStop m_HitStop;
 
     // -- nodes --
     [Header("nodes")]
@@ -56,6 +57,9 @@ public class Player: MonoBehaviour {
 
     /// the musical key
     Key m_Key;
+
+    /// if hitstop is active
+    bool m_IsHitStop;
 
     /// the hand tween on hit
     Tweener m_HitHandTween;
@@ -153,7 +157,7 @@ public class Player: MonoBehaviour {
 
         // set initial position
         m_Move.Init(cfg);
-        m_Flick.Init(m_Move.Pos + Vector2.right * 0.5f);
+        m_Flick.Init(cfg, m_Move.Pos);
 
         // show score
         m_Score.AddPlayer(cfg);
@@ -168,7 +172,7 @@ public class Player: MonoBehaviour {
     /// move line into position
     void Move() {
         // if not in hitstop
-        if (m_HitStop.IsActive) {
+        if (m_IsHitStop) {
             return;
         }
 
@@ -183,15 +187,15 @@ public class Player: MonoBehaviour {
         m_Steps.SetPitch(1.0f + m_Flick.PitchShift);
 
         // play footsteps when moving
-        var isActive = m_Move.IsActive;
+        var isActive = m_Move.IsActive || m_Flick.IsActive;
         if (isActive != m_Steps.IsPlayingLoop) {
             m_Steps.ToggleLoop(m_FootstepsLoop, isActive, m_Key);
         }
 
         // play voice when corner changes
         var corner = m_Move.Corner;
-        if (corner.IsDirty) {
-            m_Voice.PlayTone(m_VoiceLine[corner.Val], m_Key);
+        if (corner != null) {
+            m_Voice.PlayTone(m_VoiceLine[corner.Value], m_Key);
         }
     }
 
@@ -229,7 +233,8 @@ public class Player: MonoBehaviour {
         m_Flick.Finish();
 
         // play hitstop effect
-        m_HitStop.Play(m_Flick.Speed);
+        var scale = Mathf.Max(m_Flick.Speed, other.m_Flick.Speed);
+        PlayHitStop(scale);
 
         // play hit effects
         if (isAttacker) {
@@ -253,6 +258,18 @@ public class Player: MonoBehaviour {
         if (isAttacker) {
             m_Score.RecordHit(m_Config, m_Flick.Speed);
         }
+    }
+
+    /// play hitstop effect
+    void PlayHitStop(float mag) {
+        IEnumerator PlayAsync(float mag) {
+            var duration = m_HitStopDuration.Evaluate(mag);
+            m_IsHitStop = true;
+            yield return new WaitForSeconds(duration);
+            m_IsHitStop = false;
+        }
+
+        StartCoroutine(PlayAsync(mag));
     }
 
     /// play a new hand scale tween to play on hit

@@ -16,6 +16,9 @@ public sealed class PlayerConfig {
     [Tooltip("the player's initial percent")]
     public float Percent;
 
+    [Tooltip("the player's initial direction")]
+    public Vector2 Direction;
+
     [Tooltip("the player's instrument")]
     public Instrument VoiceInstrument;
 
