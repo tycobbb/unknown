@@ -55,25 +55,25 @@ public class Game: MonoBehaviour {
         m_NumPlayers++;
     }
 
-    /// collide the players together if necessary
+    /// check collisions
     void TryCollide() {
         if (m_NumPlayers != 2) {
             return;
         }
 
-        var player1 = m_Players[0];
-        var player2 = m_Players[1];
+        var p1 = m_Players[0];
+        var p2 = m_Players[1];
 
         // if the collision state changed
-        var isColliding = player1.Overlaps(player2);
+        var isColliding = p1.Overlaps(p2);
         if (m_IsColliding == isColliding) {
             return;
         }
 
         // and it's colliding, send the enter event
         if (isColliding) {
-            player1.OnCollision(player2);
-            player2.OnCollision(player1);
+            p1.OnCollision(p2);
+            p2.OnCollision(p1);
         }
 
         // update state

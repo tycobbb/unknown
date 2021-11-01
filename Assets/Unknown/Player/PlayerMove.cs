@@ -14,8 +14,11 @@ public class PlayerMove: MonoBehaviour {
     [Tooltip("the move speed in percent per second")]
     [SerializeField] float m_Speed = 0.5f;
 
+    [Tooltip("the move position fn; [0,1] -> pos.x")]
+    [SerializeField] AnimationCurve m_MovePos;
+
     [Tooltip("the dash speed as a multiplier over time")]
-    [SerializeField] AnimationCurve m_DashCurve;
+    [SerializeField] AnimationCurve m_DashAccel;
 
     // -- nodes --
     [Header("nodes")]
@@ -36,7 +39,7 @@ public class PlayerMove: MonoBehaviour {
     Buffer<Vector2> m_Dir;
 
     /// the dash speed multiplier
-    float m_DashAccel;
+    float m_DashScale;
 
     /// the pattern's corner index
     int? m_Corner;
@@ -58,7 +61,7 @@ public class PlayerMove: MonoBehaviour {
         SetPos(cfg.Percent);
 
         // set initial corner
-        m_Corner = FindCorner(cfg.Percent);
+        m_Corner = Mathf.FloorToInt(cfg.Percent * 4.0f);
     }
 
     /// read move input
@@ -97,18 +100,15 @@ public class PlayerMove: MonoBehaviour {
         // start the dash
         // TODO: move this into a method called from Play
         if (isDash) {
-            // get duration from curve
-            var duration = m_DashCurve.keys[m_DashCurve.length - 1].time;
-
             // tween the dash acceleration
             var accel = new Lens<float>(
-                ( ) => m_DashAccel,
-                (v) => m_DashAccel = v
+                ( ) => m_DashScale,
+                (v) => m_DashScale = v
             );
 
             var _ = accel
-                .TweenTo(1.0f, 0.0f, duration)
-                .SetEase(m_DashCurve);
+                .TweenTo(1.0f, 0.0f, m_DashAccel.Duration())
+                .SetEase(m_DashAccel);
         }
     }
 
@@ -145,7 +145,7 @@ public class PlayerMove: MonoBehaviour {
         }
 
         // set the new corner
-        SetCorner(pct0);
+        SyncCorner(pct0);
     }
 
     /// move towards the destination percent
@@ -165,7 +165,7 @@ public class PlayerMove: MonoBehaviour {
         }
 
         // adjust speed by dash
-        var spd = m_Speed * (1.0f + m_DashAccel);
+        var spd = m_Speed * (1.0f + m_DashScale);
 
         // move by speed to get new pct
         var pct1 = pct0 + spd * Time.deltaTime * dirM;
@@ -186,30 +186,36 @@ public class PlayerMove: MonoBehaviour {
 
         // move point
         Vector2 p;
-        p.x = Calc(pct1 + 1.375f);
-        p.y = Calc(pct1 + 1.625f);
+        p.x = m_MovePos.Evaluate(pct1);// Calc(pct1 + 1.375f);
+        p.y = m_MovePos.Evaluate(pct1 + 0.25f);
 
         // update state
         m_Pos = p;
         m_Percent = pct1;
-
-        // calc a dimension of the point; a clipped triangle wave, e.g. _/‾\_/‾
-        float Calc(float pct) {
-            return Mathf.Clamp01(Mathf.Abs(4.0f * (Mathf.Repeat(pct, 2.0f) - 1.0f)) - 2.5f);
-        }
     }
 
     /// sync our current corner
-    void SetCorner(float pct0) {
+    void SyncCorner(float pct0) {
         var pct1 = m_Percent;
 
         // default to no corner
         var ci = null as int?;
 
         // if we moved
-        if (pct0 != pct1) {
-            var c0 = FindCorner(pct0);
-            var c1 = FindCorner(pct1);
+        var dir = pct1 - pct0;
+        if (dir != 0.0f && Mathf.Repeat(pct0, 0.25f) != 0.0f) {
+            int c0;
+            int c1;
+
+            // find corner indices based on direction
+            // TODO: there must be better math here right
+            if (dir >= 0) {
+                c0 = Mathf.FloorToInt(pct0 * 4.0f);
+                c1 = Mathf.FloorToInt(pct1 * 4.0f);
+            } else {
+                c0 = Mathf.CeilToInt(pct0 * 4.0f);
+                c1 = Mathf.CeilToInt(pct1 * 4.0f);
+            }
 
             // and the corner changed
             if (c0 != c1) {
@@ -235,10 +241,5 @@ public class PlayerMove: MonoBehaviour {
     /// if the move is active
     public bool IsActive {
         get => m_Dir.Val != Vector2.zero;
-    }
-
-    /// get the corner for a percent
-    int FindCorner(float pct) {
-        return Mathf.FloorToInt(pct * 4.0f);
     }
 }
