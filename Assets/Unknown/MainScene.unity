@@ -419,6 +419,18 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 1010824611441724976, guid: 4d1857a162d284fed8ee58a258f631de, type: 3}
+      propertyPath: m_PlayerConfigs.Array.data[1].Percent
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1010824611441724976, guid: 4d1857a162d284fed8ee58a258f631de, type: 3}
+      propertyPath: m_PlayerConfigs.Array.data[0].Direction.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1010824611441724976, guid: 4d1857a162d284fed8ee58a258f631de, type: 3}
+      propertyPath: m_PlayerConfigs.Array.data[1].Direction.x
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1010824611441724976, guid: 4d1857a162d284fed8ee58a258f631de, type: 3}
       propertyPath: m_PlayerConfigs.Array.data[0].VoiceInstrument
       value: 
       objectReference: {fileID: 680607397}

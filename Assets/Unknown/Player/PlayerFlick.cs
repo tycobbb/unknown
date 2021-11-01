@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
 /// the player's flick gesture
@@ -31,6 +32,11 @@ public class PlayerFlick: MonoBehaviour {
     [Header("nodes")]
     [Tooltip("the input system input")]
     [SerializeField] PlayerInput m_Input;
+
+    // -- events --
+    [Header("events")]
+    [Tooltip("the release event")]
+    [SerializeField] UnityEvent m_OnReleaseEnd;
 
     // -- props --
     /// the current position
@@ -68,9 +74,9 @@ public class PlayerFlick: MonoBehaviour {
     }
 
     // -- commands --
-    public void Init(PlayerConfig cfg, Vector2 p0) {
+    public void Init(PlayerConfig cfg, Vector2 p0, float len) {
         // set initial position
-        m_Pos = p0 + cfg.Direction * 0.5f;
+        m_Pos = p0 + cfg.Direction * len;
     }
 
     /// read flick
@@ -115,7 +121,8 @@ public class PlayerFlick: MonoBehaviour {
     }
 
     /// move the flick into its new position
-    public void Play() {
+    public void Play(Vector2 p0) {
+        // move the flick
         if (IsReleasing) {
             Release();
         } else {
@@ -179,22 +186,30 @@ public class PlayerFlick: MonoBehaviour {
         m_ReleaseSpeed = Vector2.Distance(curr, next) / Time.deltaTime;
     }
 
-    /// finish the active release, if any
-    public void Finish() {
-        m_Pos = Offset;
+    /// cancel any active release
+    public void Cancel() {
+        Finish();
+    }
+
+    /// finish any active release
+    void Finish() {
+        m_Pos = OffsetPos;
         m_Offset = Vector2.zero;
         m_ReleaseFrame = c_ReleaseNone;
+        m_OnReleaseEnd.Invoke();
+    }
+
+    // -- props/hot --
+    /// the current position
+    public Vector2 Pos {
+        get => m_Pos;
+        set => m_Pos = value;
     }
 
     // -- queries --
-    /// find current position
-    public Vector2 Pos {
-        get => m_Pos;
-    }
-
     /// the offset position
-    public Vector2 Offset {
-        get => m_Pos + m_Offset * m_Scale;
+    public Vector2 OffsetPos {
+        get => m_Pos + Offset;
     }
 
     /// the current pitch shift
@@ -215,6 +230,11 @@ public class PlayerFlick: MonoBehaviour {
     /// if the release gesture is active
     public bool IsReleasing {
         get => m_ReleaseFrame != c_ReleaseNone;
+    }
+
+    /// the scaled offset
+    Vector2 Offset {
+        get => m_Offset * m_Scale;
     }
 
     /// if the release gesture is frame locked

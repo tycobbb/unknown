@@ -7,4 +7,9 @@ public static class Vec2 {
         vec.Normalize();
         return vec;
     }
+
+    /// the magnitude of the vector
+    public static float Magnitude(Vector2 vec) {
+        return vec.magnitude;
+    }
 }

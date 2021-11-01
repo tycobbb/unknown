@@ -55,6 +55,9 @@ public class Player: MonoBehaviour {
     /// the player's config
     PlayerConfig m_Config;
 
+    /// the current length
+    float m_Length = 0.5f;
+
     /// the musical key
     Key m_Key;
 
@@ -157,7 +160,7 @@ public class Player: MonoBehaviour {
 
         // set initial position
         m_Move.Init(cfg);
-        m_Flick.Init(cfg, m_Move.Pos);
+        m_Flick.Init(cfg, m_Move.Pos, m_Length);
 
         // show score
         m_Score.AddPlayer(cfg);
@@ -178,7 +181,8 @@ public class Player: MonoBehaviour {
 
         // play actions
         m_Move.Play();
-        m_Flick.Play();
+        m_Flick.Play(m_Move.Pos);
+        Constrain();
 
         // move to new positions
         SyncPos();
@@ -199,12 +203,35 @@ public class Player: MonoBehaviour {
         }
     }
 
+    /// constrain the length of the wand
+    void Constrain() {
+        var p0 = m_Move.Pos;
+        var p1 = m_Flick.Pos;
+
+        // get hand to foot dir
+        var dir = p1 - p0;
+
+        // given the max and actual length
+        var max = m_Length;
+        var len = Vec2.Magnitude(dir);
+
+        // pull the hand into place
+        if (max < len) {
+            m_Flick.Pos = p0 + dir.normalized * max;
+        }
+    }
+
+    /// sync length w/ present position
+    void SyncLength() {
+        m_Length = Vec2.Magnitude(m_Flick.Pos - m_Move.Pos);
+    }
+
     /// sync player position
     void SyncPos() {
         // get state
         var p0 = m_Move.Pos;
         var p1 = m_Flick.Pos;
-        var pe = m_Flick.Offset;
+        var pe = m_Flick.OffsetPos;
 
         // move hitbox
         m_Hitbox.Position = pe;
@@ -229,8 +256,8 @@ public class Player: MonoBehaviour {
             return;
         }
 
-        // finish any active release
-        m_Flick.Finish();
+        // cancel any active release
+        m_Flick.Cancel();
 
         // play hitstop effect
         var scale = Mathf.Max(m_Flick.Speed, other.m_Flick.Speed);
@@ -303,8 +330,14 @@ public class Player: MonoBehaviour {
         return m_Hitbox.Overlaps(other.m_Hitbox);
     }
 
+    // -- events --
     /// when two players collide
     public void OnCollision(Player other) {
         HitPlayer(other);
+    }
+
+    /// when a flick release finishes
+    public void OnReleaseEnd() {
+        SyncLength();
     }
 }
