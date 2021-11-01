@@ -19,10 +19,10 @@ public class Hit: MonoBehaviour {
 
     // -- commands --
     /// play the hit effect w/ the player config and initial pos
-    public static void Play(PlayerConfig cfg, Vector2 p0, float r0) {
-        var obj = Instantiate(Single.Get.Hit, p0, Quaternion.identity);
+    public static void Play(PlayerConfig cfg, HitBox hitbox) {
+        var obj = Instantiate(Single.Get.Hit, hitbox.Pos, Quaternion.identity);
         var hit = obj.GetComponent<Hit>();
-        hit.Play(cfg, r0);
+        hit.Play(cfg, hitbox.Radius);
     }
 
     /// play the hit effect

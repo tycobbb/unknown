@@ -1,20 +1,20 @@
 using System;
 using UnityEngine;
 
-/// the player's current hitbox
+/// a cicular hitbox w/ pos and radius
 [Serializable]
-public struct PlayerHitbox {
+public struct HitBox {
     // -- props --
     /// the current position
-    public Vector2 Position;
+    public Vector2 Pos;
 
     /// the radius
     public float Radius;
 
     // -- queries --
     /// check if the hitboxes overlap
-    public bool Overlaps(PlayerHitbox other) {
-        var dist = Vector2.Distance(Position, other.Position);
+    public bool Overlaps(HitBox other) {
+        var dist = Vector2.Distance(Pos, other.Pos);
         var max = Radius + other.Radius;
         return dist <= max;
     }

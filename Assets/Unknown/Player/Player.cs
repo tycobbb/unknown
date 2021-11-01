@@ -11,8 +11,12 @@ public class Player: MonoBehaviour {
 
     // -- tuning --
     [Header("tuning")]
-    [Tooltip("the hitbox at the end of the line")]
-    [SerializeField] PlayerHitbox m_Hitbox;
+    [UnityEngine.Serialization.FormerlySerializedAs("m_Hitbox")]
+    [Tooltip("the hitbox at the player's hand")]
+    [SerializeField] HitBox m_HandHitBox;
+
+    [Tooltip("the hitbox at the player's foot")]
+    [SerializeField] HitBox m_FootHitBox;
 
     [Tooltip("the scale of the hand on hit")]
     [SerializeField] Linear<float> m_HitHandScale;
@@ -35,6 +39,9 @@ public class Player: MonoBehaviour {
 
     [Tooltip("the player's hand")]
     [SerializeField] Shapes.Disc m_Hand;
+
+    [Tooltip("the player's foot")]
+    [SerializeField] Shapes.Disc m_Foot;
 
     [Tooltip("the player's ghost trail")]
     [SerializeField] Shapes.Line m_Trail;
@@ -148,11 +155,13 @@ public class Player: MonoBehaviour {
         // set colors
         m_Line.Color = fg;
         m_Hand.Color = bg;
+        m_Foot.Color = bg;
         m_Trail.Color = accent;
         m_Ghost.Color = bg;
 
-        // size hand
-        m_Hand.Radius = m_Hitbox.Radius;
+        // size hand and foot
+        m_Hand.Radius = m_HandHitBox.Radius;
+        m_Foot.Radius = m_FootHitBox.Radius;
 
         // set music props
         m_Voice.Instrument = cfg.VoiceInstrument;
@@ -233,13 +242,15 @@ public class Player: MonoBehaviour {
         var p1 = m_Flick.Pos;
         var pe = m_Flick.OffsetPos;
 
-        // move hitbox
-        m_Hitbox.Position = pe;
+        // move hitboxes
+        m_HandHitBox.Pos = pe;
+        m_FootHitBox.Pos = p0;
 
         // move actual line
         m_Line.Start = p0;
         m_Line.End = pe;
         m_Hand.transform.localPosition = pe;
+        m_Foot.transform.localPosition = p0;
 
         // move ghost trail
         m_Trail.Start = p1;
@@ -265,12 +276,7 @@ public class Player: MonoBehaviour {
 
         // play hit effects
         if (isAttacker) {
-            Hit.Play(
-                m_Config,
-                m_Hand.transform.position,
-                m_Hitbox.Radius
-            );
-
+            Hit.Play(m_Config, m_HandHitBox);
             PlayHitTweens();
         }
 
@@ -327,7 +333,10 @@ public class Player: MonoBehaviour {
     // -- collision --
     /// check if the player's overlap
     public bool Overlaps(Player other) {
-        return m_Hitbox.Overlaps(other.m_Hitbox);
+        return (
+            m_HandHitBox.Overlaps(other.m_HandHitBox) ||
+            m_HandHitBox.Overlaps(other.m_FootHitBox)
+        );
     }
 
     // -- events --
