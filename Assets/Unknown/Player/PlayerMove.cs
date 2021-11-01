@@ -128,7 +128,7 @@ public class PlayerMove: MonoBehaviour {
                 angle = 360.0f - angle;
             }
 
-            m_DstPercent = angle / 360.0f;
+            m_DstPercent = Mathf.Repeat(angle / 360.0f, 1.0f);
         }
     }
 
@@ -156,10 +156,10 @@ public class PlayerMove: MonoBehaviour {
         var dist = pctD - pct0;
 
         // find the dir to destination
-        var dirD = Mathf.Sign(dist);
+        var dir0 = Mathf.Sign(dist);
 
         // but move in the shortest path
-        var dirM = dirD;
+        var dirM = dir0;
         if (Mathf.Abs(dist) > 0.5f) {
             dirM = -dirM;
         }
@@ -171,7 +171,8 @@ public class PlayerMove: MonoBehaviour {
         var pct1 = pct0 + spd * Time.deltaTime * dirM;
 
         // if we overshot, snap to target
-        if (Mathf.Sign(pctD - pct1) != dirD) {
+        var dir1 = Mathf.Sign(pctD - pct1);
+        if (dir1 != dir0) {
             pct1 = pctD;
         }
 
