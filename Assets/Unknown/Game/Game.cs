@@ -65,7 +65,7 @@ public class Game: MonoBehaviour {
         var p2 = m_Players[1];
 
         // if the collision state changed
-        var isColliding = p1.Overlaps(p2);
+        var isColliding = p1.Overlaps(p2) || p2.Overlaps(p1);
         if (m_IsColliding == isColliding) {
             return;
         }
