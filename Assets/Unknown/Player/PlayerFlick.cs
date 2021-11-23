@@ -19,14 +19,17 @@ public class PlayerFlick: MonoBehaviour {
     [Tooltip("the max pitch shift of the flick windup")]
     [SerializeField] float m_PitchScale = 0.3f;
 
-    [Tooltip("the curve for the flick release")]
-    [SerializeField] AnimationCurve m_ReleaseCurve;
-
-    [Tooltip("the duration for the flick release")]
-    [SerializeField] float m_ReleaseDuration = 0.1f;
-
-    [Tooltip("the min alignment to detect a flick release")]
+    [Tooltip("the min alignment to detect a release")]
     [SerializeField] float m_ReleaseAlignment = 0.1f;
+
+    [Tooltip("the spring on the release")]
+    [SerializeField] float m_ReleaseSpring = 0.1f;
+
+    [Tooltip("the drag on the release")]
+    [SerializeField] float m_ReleaseDrag = 0.95f;
+
+    [Tooltip("the square speed to end the release")]
+    [SerializeField] float m_ReleaseEndSpeed = 0.05f;
 
     // -- nodes --
     [Header("nodes")]
@@ -45,32 +48,31 @@ public class PlayerFlick: MonoBehaviour {
     /// the current offset
     Vector2 m_Offset;
 
-    /// the target offset
+    /// the destination offset
     Vector2 m_DstOffset;
 
     /// the input action
     InputAction m_Action;
 
     // -- p/release
-    /// the current frame
-    int m_ReleaseFrame;
+    /// the current frame for the release
+    int m_Frame = c_ReleaseNone;
 
-    /// the time on release
-    float m_ReleaseTime;
+    /// the release velocity
+    Vector2 m_Velocity;
 
-    /// the initial release offset
-    Vector2 m_ReleaseSrc;
-
-    /// the strength of the release
-    float m_ReleaseStrength;
-
-    /// the current release speed
-    float m_ReleaseSpeed;
+    /// the target offset of the release
+    Vector2 m_Target;
 
     // -- lifecycle --
     void Awake() {
         // set props
         m_Action = m_Input.currentActionMap["Flick"];
+    }
+
+    void OnDrawGizmos() {
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireSphere(m_Pos + m_Target, 0.05f);
     }
 
     // -- commands --
@@ -82,26 +84,30 @@ public class PlayerFlick: MonoBehaviour {
     /// read flick
     public void Read() {
         // capture prev and next offset
-        var prev = m_DstOffset;
+        var curr = m_DstOffset;
         var next = m_Action.ReadValue<Vector2>();
 
-        // update state
-        m_DstOffset = next;
-
-        // read a release gesture
-        ReadRelease(prev, next);
-    }
-
-    /// read release given prev and next offset
-    void ReadRelease(Vector2 prev, Vector2 next) {
-        // unless the release is frame locked
-        if (IsReleaseLocked) {
-            return;
+        if (!IsReleasing) {
+            ReadPull(next);
         }
 
+        if (!IsReleaseLocked) {
+            ReadRelease(curr, next);
+        }
+    }
+
+    /// read pull from offset
+    void ReadPull(Vector2 next) {
+        m_DstOffset = next;
+    }
+
+    /// read release from curr and next offset
+    void ReadRelease(Vector2 curr, Vector2 next) {
+        m_DstOffset = next;
+
         // check alignment between previous dir and movement dir
-        var delta = next - prev;
-        var align = Vector2.Dot(prev.normalized, delta.normalized);
+        var delta = next - curr;
+        var align = Vector2.Dot(curr.normalized, delta.normalized);
 
         // if direction changed, this is a release
         if (Mathf.Abs(align + 1.0f) > m_ReleaseAlignment) {
@@ -110,14 +116,14 @@ public class PlayerFlick: MonoBehaviour {
 
         // init the release if this is the first frame
         if (!IsReleasing) {
-            m_ReleaseFrame = 0;
-            m_ReleaseTime = Time.time;
-            m_ReleaseSrc = prev;
-            m_ReleaseStrength = 0.0f;
+            m_Frame = 0;
+            m_Velocity = Vector2.zero;
         }
 
-        // buffer strength
-        m_ReleaseStrength = Mathf.Max(m_ReleaseStrength, delta.magnitude);
+        // buffer target
+        if (delta.magnitude > m_Velocity.magnitude) {
+            m_Target = m_DstOffset + delta;
+        }
     }
 
     /// move the flick into its new position
@@ -162,28 +168,44 @@ public class PlayerFlick: MonoBehaviour {
             return;
         }
 
-        // check elapsed time
-        var pct = (Time.time - m_ReleaseTime) / m_ReleaseDuration;
+        var v = m_Velocity;
 
-        // if the release finished, clear it
-        if (pct >= 1.0f) {
+        // apply forces to velocity
+        v += m_ReleaseSpring * (m_Target - m_Offset);
+        v *= m_ReleaseDrag;
+
+        // finish release if under the threshold
+        if (v.sqrMagnitude <= m_ReleaseEndSpeed) {
             Finish();
             return;
         }
 
-        // otherwise, figure out where we are on the release curve
-        pct = m_ReleaseCurve.Evaluate(pct);
-        if (pct > 1.0f) {
-            pct = 1.0f + (pct - 1.0f) * m_ReleaseStrength;
+        // update state
+        m_Offset += v * Time.deltaTime;
+        m_Velocity = v;
+    }
+
+    /// bounce off the normal
+    public void Bounce(Contact contact) {
+        if (!IsReleasing) {
+            return;
         }
 
-        // calculate the next offset
-        var curr = m_Offset;
-        var next = Vector2.LerpUnclamped(m_ReleaseSrc, Vector2.zero, pct);
+        var normal = contact.Normal;
 
-        // track the offset and speed
-        m_Offset = next;
-        m_ReleaseSpeed = Vector2.Distance(curr, next) / Time.deltaTime;
+        Debug.Log($"pre v {m_Velocity} n {normal} t {m_Target + m_Pos}");
+        m_Velocity = Vector2.Reflect(m_Velocity, normal);
+
+        // (p0 + d0) - 2 * n * (p0 + d0) - p0
+        // p0 + d0 - 2n * p0 - 2n * d0 - p0
+        // (1 - 2n) * p0 + (1 - 2n) * d0 - p0
+        // (1 - 2n) * (p0 + d0) - p0
+
+        var p0 = m_Target + m_Pos;
+        var p1 = p0 + 2 * normal * p0;
+        m_Target = p1 - m_Pos;
+
+        Debug.Log($"pos v {m_Velocity} n {normal} t {m_Target + m_Pos}");
     }
 
     /// cancel any active release
@@ -195,7 +217,8 @@ public class PlayerFlick: MonoBehaviour {
     void Finish() {
         m_Pos = OffsetPos;
         m_Offset = Vector2.zero;
-        m_ReleaseFrame = c_ReleaseNone;
+        m_Velocity = Vector2.zero;
+        m_Frame = c_ReleaseNone;
         m_OnReleaseEnd.Invoke();
     }
 
@@ -219,7 +242,7 @@ public class PlayerFlick: MonoBehaviour {
 
     /// the current release speed
     public float Speed {
-        get => m_ReleaseSpeed;
+        get => m_Velocity.magnitude;
     }
 
     /// if the flick is active
@@ -229,7 +252,7 @@ public class PlayerFlick: MonoBehaviour {
 
     /// if the release gesture is active
     public bool IsReleasing {
-        get => m_ReleaseFrame != c_ReleaseNone;
+        get => m_Frame != c_ReleaseNone;
     }
 
     /// the scaled offset
@@ -239,6 +262,6 @@ public class PlayerFlick: MonoBehaviour {
 
     /// if the release gesture is frame locked
     bool IsReleaseLocked {
-        get => m_ReleaseFrame > 1;
+        get => m_Frame > 1;
     }
 }

@@ -125,6 +125,8 @@ public class Player: MonoBehaviour {
 
         // apply movement
         Move();
+
+        // m_Line.Thickness = Mathf.LerpUnclamped(2.0f, 0.5f, (m_Line.End - m_Line.Start).magnitude);
     }
 
     // -- commands --
@@ -217,16 +219,16 @@ public class Player: MonoBehaviour {
         var p0 = m_Move.Pos;
         var p1 = m_Flick.Pos;
 
-        // get hand to foot dir
-        var dir = p1 - p0;
+        // get hand to foot dist
+        var dist = p1 - p0;
 
         // given the max and actual length
         var max = m_Length;
-        var len = Vec2.Magnitude(dir);
+        var len = Vec2.Magnitude(dist);
 
         // pull the hand into place
         if (max < len) {
-            m_Flick.Pos = p0 + dir.normalized * max;
+            m_Flick.Pos = p0 + dist.normalized * max;
         }
     }
 
@@ -325,24 +327,44 @@ public class Player: MonoBehaviour {
     }
 
     // -- queries --
+    /// the player's index
+    public int Index {
+        get => m_Config.Index;
+    }
+
+    /// the player's hand position
+    public Vector2 Pos {
+        get => m_Flick.Pos;
+    }
+
     /// if this player is releasing
     bool IsAttacking {
         get => m_Flick.IsReleasing;
     }
 
     // -- collision --
-    /// check if the player's overlap
-    public bool Overlaps(Player other) {
+    /// if the players overlap
+    public bool Collide(Player other) {
         return (
             m_HandHitBox.Overlaps(other.m_HandHitBox) ||
             m_HandHitBox.Overlaps(other.m_FootHitBox)
         );
     }
 
+    /// if the player overlaps the wall
+    public Contact? Collide(Wall wall) {
+        return wall.Collide(m_Flick.OffsetPos);
+    }
+
     // -- events --
     /// when two players collide
-    public void OnCollision(Player other) {
+    public void OnPlayerContact(Player other) {
         HitPlayer(other);
+    }
+
+    /// when a player collides w/ something else
+    public void OnWallContact(Contact contact) {
+        m_Flick.Bounce(contact);
     }
 
     /// when a flick release finishes

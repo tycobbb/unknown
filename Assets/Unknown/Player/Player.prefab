@@ -602,68 +602,10 @@ MonoBehaviour:
   m_Scale: 0.2
   m_Speed: 8
   m_PitchScale: 0.33333334
-  m_ReleaseCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0.52527356
-      outSlope: 0.52527356
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0.5915025
-    - serializedVersion: 3
-      time: 0.30302247
-      value: 3.0083725
-      inSlope: 0.167677
-      outSlope: 0.167677
-      tangentMode: 0
-      weightedMode: 3
-      inWeight: 0.49708164
-      outWeight: 0.36516073
-    - serializedVersion: 3
-      time: 0.5019716
-      value: 1.5170513
-      inSlope: 0.0042931978
-      outSlope: 0.0042931978
-      tangentMode: 0
-      weightedMode: 3
-      inWeight: 0.24706402
-      outWeight: 0.49020094
-    - serializedVersion: 3
-      time: 0.6095042
-      value: 1.935485
-      inSlope: 0.82343036
-      outSlope: 0.82343036
-      tangentMode: 0
-      weightedMode: 3
-      inWeight: 0.31478858
-      outWeight: 0.24964754
-    - serializedVersion: 3
-      time: 0.7481217
-      value: 1.6406275
-      inSlope: -0.021218844
-      outSlope: -0.021218844
-      tangentMode: 0
-      weightedMode: 3
-      inWeight: 0.5275099
-      outWeight: 0.23519287
-    - serializedVersion: 3
-      time: 1
-      value: 1.801761
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 1
-      inWeight: 0.7849573
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  m_ReleaseDuration: 0.5
   m_ReleaseAlignment: 0.1
+  m_ReleaseSpring: 2
+  m_ReleaseDrag: 0.9
+  m_ReleaseEndSpeed: 0.0001
   m_Input: {fileID: 408289371547382750}
   m_OnReleaseEnd:
     m_PersistentCalls:
