@@ -327,11 +327,6 @@ public class Player: MonoBehaviour {
     }
 
     // -- queries --
-    /// the player's index
-    public int Index {
-        get => m_Config.Index;
-    }
-
     /// the player's hand position
     public Vector2 Pos {
         get => m_Flick.Pos;

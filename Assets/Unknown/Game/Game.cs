@@ -59,7 +59,7 @@ public class Game: MonoBehaviour {
         // run collisions
         var mask = 0b0_0000_0000;
         CollidePlayers(ref mask);
-        CollideRoom(ref mask);
+        CollideStage(ref mask);
 
         // update current mask
         m_Collisions = mask;
@@ -92,23 +92,26 @@ public class Game: MonoBehaviour {
         mask |= bit;
     }
 
-    /// run room collisions
-    void CollideRoom(ref int mask) {
+    /// run stage collisions
+    void CollideStage(ref int mask) {
         // for each player
         for (var i = 0; i < m_NumPlayers; i++) {
             var player = m_Players[i];
 
             // and each wall
-            foreach (var wall in m_Walls) {
+            for (var j = 0; j < m_Walls.Length; j++) {
+                var wall = m_Walls[j];
+
+                // check for a collision
                 var contact = player.Collide(wall);
 
-                // if a collision happened
+                // if it happened
                 if (contact == null) {
                     continue;
                 }
 
                 // find collision bit (see `m_Collisions`)
-                var pos = 1 + wall.Index + player.Index * m_Walls.Length;
+                var pos = 1 + j + i * m_Walls.Length;
                 var bit = 1 << pos;
 
                 // if it just happened
@@ -152,11 +155,6 @@ public class Game: MonoBehaviour {
     }
 
     // -- queries --
-    /// if the collision bit is on
-    bool IsColliding(int mask) {
-        return (m_Collisions & mask) == mask;
-    }
-
     /// if the collision bit turned on this frame
     bool IsJustColliding(int bit) {
         return bit != 0 && (bit & m_Collisions) == 0;

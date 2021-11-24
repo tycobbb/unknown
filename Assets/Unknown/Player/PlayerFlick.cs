@@ -185,27 +185,24 @@ public class PlayerFlick: MonoBehaviour {
         m_Velocity = v;
     }
 
-    /// bounce off the normal
+    /// bounce off a surface
     public void Bounce(Contact contact) {
         if (!IsReleasing) {
             return;
         }
 
-        var normal = contact.Normal;
+        // reflect velocity off surface
+        var v0 = m_Velocity;
+        var v1 = Vector2.Reflect(v0, contact.Normal);
 
-        Debug.Log($"pre v {m_Velocity} n {normal} t {m_Target + m_Pos}");
-        m_Velocity = Vector2.Reflect(m_Velocity, normal);
+        // project the remaining dist to the target onto the new direction
+        var pc = contact.Pos;
+        var p0 = m_Pos + m_Target;
+        var p1 = pc + v1.normalized * Vector2.Distance(pc, p0) - m_Pos;
 
-        // (p0 + d0) - 2 * n * (p0 + d0) - p0
-        // p0 + d0 - 2n * p0 - 2n * d0 - p0
-        // (1 - 2n) * p0 + (1 - 2n) * d0 - p0
-        // (1 - 2n) * (p0 + d0) - p0
-
-        var p0 = m_Target + m_Pos;
-        var p1 = p0 + 2 * normal * p0;
-        m_Target = p1 - m_Pos;
-
-        Debug.Log($"pos v {m_Velocity} n {normal} t {m_Target + m_Pos}");
+        // update state
+        m_Target = p1;
+        m_Velocity = v1;
     }
 
     /// cancel any active release

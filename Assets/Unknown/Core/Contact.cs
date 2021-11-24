@@ -9,14 +9,10 @@ public struct Contact {
     /// the normal
     public readonly Vector2 Normal;
 
-    /// the tangent
-    public readonly Vector2 Tangent;
-
     // -- lifetime --
     /// create a new collision
-    public Contact(Vector2 pos, Vector2 normal, Vector2 tangent) {
+    public Contact(Vector2 pos, Vector2 normal = default) {
         Pos = pos;
         Normal = normal;
-        Tangent = tangent;
     }
 }

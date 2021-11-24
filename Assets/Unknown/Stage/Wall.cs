@@ -3,9 +3,6 @@ using UnityEngine;
 // -- types --
 /// a wall
 public interface Wall {
-    /// the wall's index
-    int Index { get; }
-
     /// check for a collision at the point
     Contact? Collide(Vector2 pt);
 }
@@ -21,19 +18,19 @@ public struct SquareWall: Wall {
 
     // -- props --
     /// the index
-    public readonly int Index;
+    public readonly int m_I;
 
     // -- lifetime --
     /// create a new wall
     SquareWall(int i) {
-        Index = i;
+        m_I = i;
     }
 
     // -- Wall --
     /// if a point overlaps the wall
     public Contact? Collide(Vector2 p) {
         // if point overlaps
-        var isOverlap = Index switch {
+        var isOverlap = m_I switch {
             c_Top    => p.y >= 1.0f,
             c_Bottom => p.y <= 0.0f,
             c_Left   => p.x <= 0.0f,
@@ -45,11 +42,11 @@ public struct SquareWall: Wall {
         }
 
         // init the collision
-        var collision = Index switch {
-            c_Top    => new Contact(p, Vector2.down,  Vector2.right),
-            c_Bottom => new Contact(p, Vector2.up,    Vector2.right),
-            c_Left   => new Contact(p, Vector2.right, Vector2.up),
-            _        => new Contact(p, Vector2.left,  Vector2.up),
+        var collision = m_I switch {
+            c_Top    => new Contact(p, Vector2.down),
+            c_Bottom => new Contact(p, Vector2.up),
+            c_Left   => new Contact(p, Vector2.right),
+            _        => new Contact(p, Vector2.left),
         };
 
         return collision;
