@@ -1,3 +1,3 @@
-# stick game
+# wands
 
-vibing/fighting as a stick in a box
+vibing/fighting/dancing as a wand in a box
