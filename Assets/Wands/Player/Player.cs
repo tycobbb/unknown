@@ -262,37 +262,24 @@ public class Player: MonoBehaviour {
 
     /// trigger a collision
     void HitPlayer(Player other) {
-        // if at least one player is attacking
-        var isAttacker = IsAttacking;
-        var isAttacked = other.IsAttacking;
-        if (!isAttacker && !isAttacked) {
-            return;
-        }
-
-        // cancel any active release
+        // cancel the active flick
+        var speed = m_Flick.Speed;
         m_Flick.Cancel();
 
-        // play hitstop effect
-        var scale = Mathf.Max(m_Flick.Speed, other.m_Flick.Speed);
-        PlayHitStop(scale);
+        // play hitstop
+        PlayHitStop(speed);
+        other.PlayHitStop(speed);
 
         // play hit effects
-        if (isAttacker) {
-            Hit.Play(m_Config, m_HandHitBox);
-            PlayHitTweens();
-        }
+        Hit.Play(m_Config, m_HandHitBox);
+        PlayHitTweens();
 
         // play the chord
-        if (isAttacker) {
-            m_Voice.PlayChord(m_HitChord, m_Key);
-        } else {
-            m_Voice.PlayChord(m_HurtChord, m_Key);
-        }
+        m_Voice.PlayChord(m_HitChord, m_Key);
+        other.m_Voice.PlayChord(m_HurtChord, m_Key);
 
         // record the hit
-        if (isAttacker) {
-            m_Score.RecordHit(m_Config, m_Flick.Speed);
-        }
+        m_Score.RecordHit(m_Config, speed);
     }
 
     /// play hitstop effect
@@ -307,7 +294,7 @@ public class Player: MonoBehaviour {
         StartCoroutine(PlayAsync(mag));
     }
 
-    /// play a new hand scale tween to play on hit
+    /// play a new hand scale tween
     void PlayHitTweens() {
         // get start and end radius
         var r0 = m_Hand.Radius;
@@ -338,23 +325,34 @@ public class Player: MonoBehaviour {
     }
 
     // -- collision --
-    /// if the players overlap
+    /// if the players collide
     public bool Collide(Player other) {
+        // only collide when attacking
+        if (!IsAttacking) {
+            return false;
+        }
+
+        // and hand is hitting the other player
         return (
             m_HandHitBox.Overlaps(other.m_HandHitBox) ||
             m_HandHitBox.Overlaps(other.m_FootHitBox)
         );
     }
 
-    /// if the player overlaps the wall
+    /// if the player and wall collide
     public Contact? Collide(Wall wall) {
         return wall.Collide(m_Flick.OffsetPos);
     }
 
     // -- events --
     /// when two players collide
-    public void OnPlayerContact(Player other) {
-        HitPlayer(other);
+    public void OnPlayerContact(Player other, bool mutual) {
+        var p = this;
+        var o = other;
+
+        if (!mutual) {
+            p.HitPlayer(other);
+        }
     }
 
     /// when a player collides w/ something else

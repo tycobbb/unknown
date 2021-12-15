@@ -76,7 +76,9 @@ public class Game: MonoBehaviour {
         var p2 = m_Players[1];
 
         // if a collision happened
-        if (!p1.Collide(p2) && !p2.Collide(p1)) {
+        var c1 = p1.Collide(p2);
+        var c2 = p2.Collide(p1);
+        if (!c1 && !c2) {
             return;
         }
 
@@ -84,8 +86,18 @@ public class Game: MonoBehaviour {
 
         // if it just happened, fire events
         if (IsJustColliding(bit)) {
-            p1.OnPlayerContact(p2);
-            p2.OnPlayerContact(p1);
+            // if simultaneous hit
+            if (c1 && c2) {
+                p1.OnPlayerContact(p2, mutual: true);
+            }
+            // if player 1 hit
+            else if (c1) {
+                p1.OnPlayerContact(p2, mutual: false);
+            }
+            // if player 2 hit
+            else {
+                p2.OnPlayerContact(p1, mutual: false);
+            }
         }
 
         // update state
