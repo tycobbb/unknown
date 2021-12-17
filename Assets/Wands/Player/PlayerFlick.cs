@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
+namespace Wands {
+
 /// the player's flick gesture
 public class PlayerFlick: MonoBehaviour {
     // -- constants --
@@ -261,4 +263,6 @@ public class PlayerFlick: MonoBehaviour {
     bool IsReleaseLocked {
         get => m_Frame > 1;
     }
+}
+
 }

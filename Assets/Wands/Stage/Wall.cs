@@ -1,5 +1,7 @@
 using UnityEngine;
 
+namespace Wands {
+
 // -- types --
 /// a wall
 public interface Wall {
@@ -62,4 +64,6 @@ public struct SquareWall: Wall {
             new SquareWall(c_Right)
         };
     }
+}
+
 }

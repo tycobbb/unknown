@@ -1,7 +1,8 @@
-using System.Collections;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.InputSystem;
+
+namespace Wands {
 
 /// the line pattern
 public class PlayerMove: MonoBehaviour {
@@ -243,4 +244,6 @@ public class PlayerMove: MonoBehaviour {
     public bool IsActive {
         get => m_Dir.Val != Vector2.zero;
     }
+}
+
 }

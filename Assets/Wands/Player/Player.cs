@@ -3,6 +3,8 @@ using DG.Tweening;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+namespace Wands {
+
 /// a player
 public class Player: MonoBehaviour {
     // -- deps --
@@ -364,4 +366,6 @@ public class Player: MonoBehaviour {
     public void OnReleaseEnd() {
         SyncLength();
     }
+}
+
 }

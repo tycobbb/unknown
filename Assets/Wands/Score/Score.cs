@@ -2,7 +2,9 @@ using System;
 using TMPro;
 using UnityEngine;
 
-/// the score ui label
+namespace Wands {
+
+/// the score module
 public class Score: MonoBehaviour {
     // -- constants --
     /// the winning score
@@ -179,4 +181,6 @@ public class Score: MonoBehaviour {
         /// the players completion time
         public float? FinishTime;
     }
+}
+
 }

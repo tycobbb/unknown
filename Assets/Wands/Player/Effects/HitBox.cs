@@ -1,6 +1,8 @@
 using System;
 using UnityEngine;
 
+namespace Wands {
+
 /// a cicular hitbox w/ pos and radius
 [Serializable]
 public struct HitBox {
@@ -18,4 +20,6 @@ public struct HitBox {
         var max = Radius + other.Radius;
         return dist <= max;
     }
+}
+
 }

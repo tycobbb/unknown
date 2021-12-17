@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
+namespace Wands {
+
 /// the game
 public class Game: MonoBehaviour {
     // -- config --
@@ -189,4 +191,6 @@ public class Game: MonoBehaviour {
 
         AddPlayer(player);
     }
+}
+
 }

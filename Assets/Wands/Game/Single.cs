@@ -1,5 +1,8 @@
 using UnityEngine;
 
+namespace Wands {
+
+/// a dependency container
 public sealed class Single: MonoBehaviour {
     // -- module --
     /// the shared instance
@@ -21,4 +24,6 @@ public sealed class Single: MonoBehaviour {
             s_Get = this;
         }
     }
+}
+
 }

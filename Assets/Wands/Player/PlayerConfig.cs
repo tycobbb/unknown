@@ -1,6 +1,8 @@
 using System;
 using UnityEngine;
 
+namespace Wands {
+
 /// a player's config
 [Serializable]
 public sealed class PlayerConfig {
@@ -24,4 +26,6 @@ public sealed class PlayerConfig {
 
     [Tooltip("the player's footsteps instrument")]
     public Instrument FootstepsInstrument;
+}
+
 }

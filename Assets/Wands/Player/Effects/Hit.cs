@@ -2,6 +2,8 @@ using System.Collections;
 using DG.Tweening;
 using UnityEngine;
 
+namespace Wands {
+
 /// a visual hit ring effect
 public class Hit: MonoBehaviour {
     // -- tuning --
@@ -64,4 +66,6 @@ public class Hit: MonoBehaviour {
         yield return new WaitForSeconds(m_Duration);
         Destroy(gameObject);
     }
+}
+
 }
