@@ -34,12 +34,6 @@ public class Game: MonoBehaviour {
     bool m_IsScreenshot;
 
     // -- lifecycle --
-    void Start() {
-        var prefab = GetComponent<PlayerInputManager>().playerPrefab;
-        Instantiate(prefab);
-        Instantiate(prefab);
-    }
-
     void FixedUpdate() {
         // read input
         ReadHotkeys();
@@ -96,15 +90,15 @@ public class Game: MonoBehaviour {
         if (IsJustColliding(bit)) {
             // if simultaneous hit
             if (c1 && c2) {
-                p1.OnPlayerContact(p2, mutual: true);
+                p1.OnPlayerCollision(p2, mutual: true);
             }
             // if player 1 hit
             else if (c1) {
-                p1.OnPlayerContact(p2, mutual: false);
+                p1.OnPlayerCollision(p2, mutual: false);
             }
             // if player 2 hit
             else {
-                p2.OnPlayerContact(p1, mutual: false);
+                p2.OnPlayerCollision(p1, mutual: false);
             }
         }
 
@@ -123,10 +117,10 @@ public class Game: MonoBehaviour {
                 var wall = m_Walls[j];
 
                 // check for a collision
-                var contact = player.Collide(wall);
+                var collision = player.Collide(wall);
 
                 // if it happened
-                if (contact == null) {
+                if (collision == null) {
                     continue;
                 }
 
@@ -136,7 +130,7 @@ public class Game: MonoBehaviour {
 
                 // if it just happened
                 if (IsJustColliding(bit)) {
-                    player.OnWallContact(contact.Value);
+                    player.OnWallCollision(collision.Value);
                 }
 
                 mask |= bit;

@@ -2,6 +2,12 @@ using UnityEngine;
 
 /// static extensions for Vector3
 public static class Vec3 {
+    /// create a Vector2 by setting the x value
+    public static Vector3 X(this Vector3 v, float x) {
+        v.x = x;
+        return v;
+    }
+
     /// create a Vector3 with components (0, 0, y)
     public static Vector3 XYN(this Vector3 v) {
         return new Vector3(v.x, v.y, 0.0f);

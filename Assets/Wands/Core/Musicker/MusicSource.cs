@@ -245,7 +245,8 @@ public sealed class MusicSource: MonoBehaviour {
     /// play the loop
     IEnumerator PlayLoopAsync(Loop loop, Key? key = null) {
         // fade in
-        VolumeLens().Tween(0.0f, m_MaxVolume, duration: loop.Fade);
+        var master = VolumeLens();
+        master.Tween(0.0f, m_MaxVolume, dur: loop.Fade);
 
         // the time between loop plays
         var blend = loop.Blend;
@@ -257,7 +258,7 @@ public sealed class MusicSource: MonoBehaviour {
             var source = VolumeLens(i);
 
             // blend in the tone
-            source.Tween(0.0f, m_MaxVolume, duration: blend);
+            source.Tween(0.0f, m_MaxVolume, dur: blend);
 
             // play the tone
             PlayTone(loop.Curr(), key);
@@ -270,7 +271,7 @@ public sealed class MusicSource: MonoBehaviour {
             }
 
             // blend out the tone
-            source.Tween(m_MaxVolume, 0.0f, duration: blend);
+            source.Tween(m_MaxVolume, 0.0f, dur: blend);
         }
     }
 
@@ -285,7 +286,8 @@ public sealed class MusicSource: MonoBehaviour {
         StopCoroutine(m_Routine);
 
         // fade out
-        VolumeLens().Tween(m_MaxVolume, 0.0f, duration: m_Loop.Fade);
+        var master = VolumeLens();
+        master.Tween(m_MaxVolume, 0.0f, dur: m_Loop.Fade);
 
         // reset state
         m_Loop = null;

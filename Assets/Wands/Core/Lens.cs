@@ -38,4 +38,28 @@ public struct Lens<T> {
             (v) => l.Val = set.Invoke(v)
         );
     }
+
+    /// add a side effect on set
+    public Lens<T> OnSet(Action<T> action) {
+        var l = this;
+
+        return new Lens<T>(
+            ( ) => l.Val,
+            (v) => {
+                l.Val = v;
+                action.Invoke(v);
+            }
+        );
+    }
+
+    // -- factories --
+    /// create a lens with an internal value
+    public static Lens<T> State(T from = default) {
+        var val = from;
+
+        return new Lens<T>(
+            ( ) => val,
+            (v) => val = v
+        );
+    }
 }

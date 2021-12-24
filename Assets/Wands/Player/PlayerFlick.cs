@@ -188,7 +188,7 @@ public class PlayerFlick: MonoBehaviour {
     }
 
     /// bounce off a surface
-    public void Bounce(Contact contact) {
+    public void Bounce(Collision contact) {
         if (!IsReleasing) {
             return;
         }

@@ -408,6 +408,7 @@ GameObject:
   - component: {fileID: 2654353223563995127}
   - component: {fileID: 8850847092332644763}
   - component: {fileID: 8974707013794418215}
+  - component: {fileID: 6389595028469211137}
   - component: {fileID: 7025300543588707201}
   - component: {fileID: 5438007216668105070}
   - component: {fileID: 408289371547382750}
@@ -455,38 +456,12 @@ MonoBehaviour:
   m_FootHitBox:
     Pos: {x: 0, y: 0}
     Radius: 0.025
-  m_HitHandScale:
-    Val: 0
-    Len: 0
-  m_HitStopDuration:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0.5
-      inSlope: 0.5
-      outSlope: 0.5
-      tangentMode: 34
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 0.5
-      outSlope: 0.5
-      tangentMode: 34
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
   m_Move: {fileID: 3619973663402455770}
   m_Flick: {fileID: 8712634408959464779}
   m_HitStop: {fileID: 2654353223563995127}
   m_HitScale: {fileID: 8850847092332644763}
   m_HitRing: {fileID: 8974707013794418215}
+  m_BounceLine: {fileID: 6389595028469211137}
   m_Line: {fileID: 3898287554920713603}
   m_Hand: {fileID: 6400796380260406308}
   m_Foot: {fileID: 4052128944614130644}
@@ -693,6 +668,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Prefab: {fileID: 1748105126704352588, guid: 673a3072975d44f6dad39a20b1e255dc, type: 3}
+--- !u!114 &6389595028469211137
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4562596083273999880}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a2df54027d4cf4489a560f061655c8d8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Prefab: {fileID: 51932767270805936, guid: 78af0b80e33cc4a898efb329c0dda6b0, type: 3}
 --- !u!114 &7025300543588707201
 MonoBehaviour:
   m_ObjectHideFlags: 0

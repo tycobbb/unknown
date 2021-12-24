@@ -32,7 +32,7 @@ public static class TweenExt {
         this Lens<float> prop,
         float src,
         float dst,
-        float duration
+        float dur
     ) {
         // set the initial value
         prop.Val = src;
@@ -42,7 +42,7 @@ public static class TweenExt {
             ( ) => prop.Val,
             (v) => prop.Val = v,
             dst,
-            duration
+            dur
         );
 
         return tween;

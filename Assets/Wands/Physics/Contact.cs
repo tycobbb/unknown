@@ -1,7 +1,9 @@
 using UnityEngine;
 
+namespace Wands {
+
 /// a collision w/ a wall
-public struct Contact {
+public struct Collision {
     // -- props --
     /// the collision point
     public readonly Vector2 Pos;
@@ -11,8 +13,10 @@ public struct Contact {
 
     // -- lifetime --
     /// create a new collision
-    public Contact(Vector2 pos, Vector2 normal = default) {
+    public Collision(Vector2 pos, Vector2 normal = default) {
         Pos = pos;
         Normal = normal;
     }
+}
+
 }

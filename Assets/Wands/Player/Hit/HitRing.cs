@@ -20,7 +20,7 @@ public readonly struct HitRingEvent {
 }
 
 /// a hit ring that expands from the hit position
-public sealed class HitRing: MonoBehaviour, IEffectAsync<HitRingEvent> {
+public sealed class HitRing: MonoBehaviour, IEffect<HitRingEvent> {
     // -- tuning --
     [Header("tuning")]
     [Tooltip("the length of the effect")]
@@ -29,48 +29,50 @@ public sealed class HitRing: MonoBehaviour, IEffectAsync<HitRingEvent> {
     [Tooltip("the multiplier to grow the hit radius by")]
     [SerializeField] float m_SizeMultiplier = 10.0f;
 
-    // -- config --
-    [Header("config")]
+    // -- nodes --
+    [Header("nodes")]
     [Tooltip("the hit circle")]
     [SerializeField] Shapes.Disc m_Circle;
 
     // -- commands --
     /// play the hit effect
-    public IEnumerator PlayAsync(HitRingEvent evt) {
+    public void Play(HitRingEvent evt) {
+        // build tween sequence
+        var seq = DOTween.Sequence();
+
+        // get lens for circle radius & color
+        var radius = new Lens<float>(
+            ( ) => m_Circle.Radius,
+            (v) => m_Circle.Radius = v
+        );
+
+        var alpha = new Lens<float>(
+            ( ) => m_Circle.Color.a,
+            (v) => m_Circle.Color = m_Circle.Color.A(v)
+        );
+
         // get props from event
-        var c0 = evt.Config.Color;
+        var c0 = evt.Config.Color.ToHsv().Add(v: 0.3f).ToRgb();
         var r0 = evt.HitBox.Radius;
+        var r1 = r0 * m_SizeMultiplier;
 
-        // get color
-        var color = c0.ToHsv().Add(v: 0.3f).ToRgb();
+        // build tween
+        seq = seq
+            .Join(radius.Tween(
+                src: r0,
+                dst: r1,
+                dur: m_Duration
+            ))
+            .Join(alpha.Tween(
+                src: c0.a,
+                dst: 0.0f,
+                dur: m_Duration
+            ))
+            .SetEase(Ease.OutCubic)
+            .OnComplete(() => Destroy(gameObject));
 
-        // set initial state
-        m_Circle.Color = color;
-        m_Circle.Radius = r0;
-
-        // tween radius
-        DOTween
-            .To(
-                ( ) => m_Circle.Radius,
-                (v) => m_Circle.Radius = v,
-                r0 * m_SizeMultiplier,
-                m_Duration
-            )
-            .SetEase(Ease.OutCubic);
-
-        // tween alpha
-        DOTween
-            .To(
-                ( ) => m_Circle.Color.a,
-                (v) => m_Circle.Color = m_Circle.Color.A(v),
-                0.0f,
-                m_Duration
-            )
-            .SetEase(Ease.OutCubic);
-
-        // remove on complete
-        yield return new WaitForSeconds(m_Duration);
-        Destroy(gameObject);
+        // and play it
+        seq.Play();
     }
 }
 

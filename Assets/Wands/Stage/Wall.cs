@@ -6,7 +6,7 @@ namespace Wands {
 /// a wall
 public interface Wall {
     /// check for a collision at the point
-    Contact? Collide(Vector2 pt);
+    Collision? Collide(Vector2 pt);
 }
 
 // -- impls --
@@ -30,7 +30,7 @@ public struct SquareWall: Wall {
 
     // -- Wall --
     /// if a point overlaps the wall
-    public Contact? Collide(Vector2 p) {
+    public Collision? Collide(Vector2 p) {
         // if point overlaps
         var isOverlap = m_I switch {
             c_Top    => p.y >= 1.0f,
@@ -45,10 +45,10 @@ public struct SquareWall: Wall {
 
         // init the collision
         var collision = m_I switch {
-            c_Top    => new Contact(p, Vector2.down),
-            c_Bottom => new Contact(p, Vector2.up),
-            c_Left   => new Contact(p, Vector2.right),
-            _        => new Contact(p, Vector2.left),
+            c_Top    => new Collision(p, Vector2.down),
+            c_Bottom => new Collision(p, Vector2.up),
+            c_Left   => new Collision(p, Vector2.right),
+            _        => new Collision(p, Vector2.left),
         };
 
         return collision;

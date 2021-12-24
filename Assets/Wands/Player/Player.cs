@@ -34,8 +34,11 @@ public class Player: MonoBehaviour {
     [Tooltip("the hit scale effect")]
     [SerializeField] HitScale m_HitScale;
 
-    [Tooltip("the hit ring effect source")]
+    [Tooltip("the hit ring effect")]
     [SerializeField] HitRingSource m_HitRing;
+
+    [Tooltip("the bounce line effect")]
+    [SerializeField] BounceLineSource m_BounceLine;
 
     // -- nodes --
     [Header("nodes")]
@@ -265,7 +268,7 @@ public class Player: MonoBehaviour {
         m_Ghost.transform.localPosition = p1;
     }
 
-    /// trigger a collision
+    /// trigger a collision with another player
     void HitPlayer(Player other) {
         // shorthand for players
         var p = this;
@@ -289,6 +292,12 @@ public class Player: MonoBehaviour {
 
         // record the hit
         m_Score.RecordHit(m_Config, speed);
+    }
+
+    // trigger with a contact point on a wall
+    void HitWall(Collision wall) {
+        m_Flick.Bounce(wall);
+        m_BounceLine.Play(wall);
     }
 
     // -- queries --
@@ -318,13 +327,13 @@ public class Player: MonoBehaviour {
     }
 
     /// if the player and wall collide
-    public Contact? Collide(Wall wall) {
+    public Collision? Collide(Wall wall) {
         return wall.Collide(m_Flick.OffsetPos);
     }
 
     // -- events --
     /// when two players collide
-    public void OnPlayerContact(Player other, bool mutual) {
+    public void OnPlayerCollision(Player other, bool mutual) {
         var p = this;
         var o = other;
 
@@ -334,8 +343,8 @@ public class Player: MonoBehaviour {
     }
 
     /// when a player collides w/ something else
-    public void OnWallContact(Contact contact) {
-        m_Flick.Bounce(contact);
+    public void OnWallCollision(Collision wall) {
+        HitWall(wall);
     }
 
     /// when a flick release finishes
