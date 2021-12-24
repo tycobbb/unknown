@@ -4,8 +4,23 @@ using UnityEngine;
 
 namespace Wands {
 
-/// a visual hit ring effect
-public class Hit: MonoBehaviour {
+/// the event data for the hit ring
+public readonly struct HitRingEvent {
+    /// the player config for the hit
+    public readonly PlayerConfig Config;
+
+    /// the hitbox of the thing hit
+    public readonly HitBox HitBox;
+
+    /// create a new event
+    public HitRingEvent(PlayerConfig config, HitBox hitBox) {
+        Config = config;
+        HitBox = hitBox;
+    }
+}
+
+/// a hit ring that expands from the hit position
+public sealed class HitRing: MonoBehaviour, IEffectAsync<HitRingEvent> {
     // -- tuning --
     [Header("tuning")]
     [Tooltip("the length of the effect")]
@@ -20,26 +35,17 @@ public class Hit: MonoBehaviour {
     [SerializeField] Shapes.Disc m_Circle;
 
     // -- commands --
-    /// play the hit effect w/ the player config and initial pos
-    public static void Play(PlayerConfig cfg, HitBox hitbox) {
-        var obj = Instantiate(Single.Get.Hit, hitbox.Pos, Quaternion.identity);
-        var hit = obj.GetComponent<Hit>();
-        hit.Play(cfg, hitbox.Radius);
-    }
-
     /// play the hit effect
-    void Play(PlayerConfig cfg, float r0) {
-        StartCoroutine(PlayAsync(cfg, r0));
-    }
+    public IEnumerator PlayAsync(HitRingEvent evt) {
+        // get props from event
+        var c0 = evt.Config.Color;
+        var r0 = evt.HitBox.Radius;
 
-    /// play the hit effect
-    IEnumerator PlayAsync(PlayerConfig cfg, float r0) {
         // get color
-        var hsv = cfg.Color.ToHsv();
-        var rgb = hsv.Add(v: 0.3f).ToRgb();
+        var color = c0.ToHsv().Add(v: 0.3f).ToRgb();
 
         // set initial state
-        m_Circle.Color = rgb;
+        m_Circle.Color = color;
         m_Circle.Radius = r0;
 
         // tween radius

@@ -26,17 +26,28 @@ public class Player: MonoBehaviour {
     [Tooltip("the hitstop duration curve")]
     [SerializeField] AnimationCurve m_HitStopDuration;
 
-    // -- parts --
-    [Header("parts")]
+    // -- components --
+    [Header("components")]
     [Tooltip("the move action")]
     [SerializeField] PlayerMove m_Move;
 
     [Tooltip("the flick action")]
     [SerializeField] PlayerFlick m_Flick;
 
+    // -- effects --
+    [Header("effects")]
+    [Tooltip("the hit stop effect")]
+    [SerializeField] HitStop m_HitStop;
+
+    [Tooltip("the hit scale effect")]
+    [SerializeField] HitScale m_HitScale;
+
+    [Tooltip("the hit ring effect source")]
+    [SerializeField] HitRingSource m_HitRing;
+
     // -- nodes --
     [Header("nodes")]
-    [Tooltip("the player's linGe")]
+    [Tooltip("the player's line")]
     [SerializeField] Shapes.Line m_Line;
 
     [Tooltip("the player's hand")]
@@ -69,12 +80,6 @@ public class Player: MonoBehaviour {
 
     /// the musical key
     Key m_Key;
-
-    /// if hitstop is active
-    bool m_IsHitStop;
-
-    /// the hand tween on hit
-    Tweener m_HitHandTween;
 
     /// a line as the player's anchor changes
     Line m_VoiceLine;
@@ -188,7 +193,7 @@ public class Player: MonoBehaviour {
     /// move line into position
     void Move() {
         // if not in hitstop
-        if (m_IsHitStop) {
+        if (m_HitStop.IsActive) {
             return;
         }
 
@@ -264,55 +269,29 @@ public class Player: MonoBehaviour {
 
     /// trigger a collision
     void HitPlayer(Player other) {
+        // shorthand for players
+        var p = this;
+        var o = other;
+
         // cancel the active flick
         var speed = m_Flick.Speed;
         m_Flick.Cancel();
 
         // play hitstop
-        PlayHitStop(speed);
-        other.PlayHitStop(speed);
+        var dur = m_HitStopDuration.Evaluate(speed);
+        p.m_HitStop.Play(dur, source: p);
+        o.m_HitStop.Play(dur, source: o);
 
         // play hit effects
-        Hit.Play(m_Config, m_HandHitBox);
-        PlayHitTweens();
+        m_HitRing.Play(new HitRingEvent(m_Config, m_HandHitBox));
+        m_HitScale.Play();
 
         // play the chord
-        m_Voice.PlayChord(m_HitChord, m_Key);
-        other.m_Voice.PlayChord(m_HurtChord, m_Key);
+        p.m_Voice.PlayChord(m_HitChord, p.m_Key);
+        o.m_Voice.PlayChord(m_HurtChord, o.m_Key);
 
         // record the hit
         m_Score.RecordHit(m_Config, speed);
-    }
-
-    /// play hitstop effect
-    void PlayHitStop(float mag) {
-        IEnumerator PlayAsync(float mag) {
-            var duration = m_HitStopDuration.Evaluate(mag);
-            m_IsHitStop = true;
-            yield return new WaitForSeconds(duration);
-            m_IsHitStop = false;
-        }
-
-        StartCoroutine(PlayAsync(mag));
-    }
-
-    /// play a new hand scale tween
-    void PlayHitTweens() {
-        // get start and end radius
-        var r0 = m_Hand.Radius;
-        var r1 = m_HitHandScale.Mul(r0, 0.5f);
-
-        // get lens
-        var radius = new Lens<float>(
-            ( ) => m_Hand.Radius,
-            (v) => m_Hand.Radius = v
-        );
-
-        // create tween
-        radius
-            .TweenTo(r0, r1)
-            .SetLoops(2, LoopType.Yoyo)
-            .SetEase(Ease.InOutCubic);
     }
 
     // -- queries --

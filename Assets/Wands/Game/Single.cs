@@ -13,11 +13,6 @@ public sealed class Single: MonoBehaviour {
         get => s_Get;
     }
 
-    // -- props --
-    [Header("single")]
-    [Tooltip("the prefab for the hit effect")]
-    public GameObject Hit;
-
     // -- lifecycle --
     void Awake() {
         if (s_Get == null) {

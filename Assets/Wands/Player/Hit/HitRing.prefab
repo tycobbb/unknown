@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 3598955067712486354}
   - component: {fileID: 2523113985009129598}
   m_Layer: 0
-  m_Name: Hit
+  m_Name: HitRing
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -43,11 +43,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 1748105126704352588}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b20d0a57a907e49138c644c43a0a9438, type: 3}
+  m_Script: {fileID: 11500000, guid: 096e84627886c4b40ae00faabcfef8f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Duration: 0.5
-  m_SizeMultiplier: 15
+  m_Duration: 2
+  m_SizeMultiplier: 10
   m_Circle: {fileID: 6912599164027273060}
 --- !u!114 &6912599164027273060
 MonoBehaviour:
