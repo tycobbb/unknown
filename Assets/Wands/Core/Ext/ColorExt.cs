@@ -1,6 +1,6 @@
 using UnityEngine;
 
-/// extensions for Color
+/// unity color extensions
 public static class ColorExt {
     // -- operators --
     /// creates a new color with the alpha

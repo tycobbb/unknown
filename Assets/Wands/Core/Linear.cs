@@ -1,21 +1,22 @@
 using System;
 using UnityEngine;
+using U = UnityEngine;
 
 /// the params for a linear equation
 [Serializable]
 public struct Linear<T> {
     // -- props --
-    [Tooltip("the destination value.")]
-    public T Value;
+    [Tooltip("the destination value")]
+    public T Val;
 
-    [Tooltip("a scale. interpretation is context-dependent.")]
-    public float Scale;
+    [Tooltip("the length; interpretation is context-dependent.")]
+    public float Len;
 
     // -- lifetime --
     /// create a new linear value
     public Linear(T val, float scale) {
-        Value = val;
-        Scale = scale;
+        Val = val;
+        Len = scale;
     }
 
     // -- factories --
@@ -25,11 +26,18 @@ public struct Linear<T> {
     }
 }
 
+/// extensions on linear float values
 public static class LinearExt {
-    public static Linear<float> Mul(this Linear<float> curr, float val, float scale) {
+    /// samples a random value from the linear float (value is min, scale is len)
+    public static float Sample(this Linear<float> l) {
+        return l.Val + U.Random.value * l.Len;
+    }
+
+    /// multiplies two linear values together
+    public static Linear<float> Mul(this Linear<float> curr, Linear<float> other) {
         var next = curr;
-        next.Value *= val;
-        next.Scale *= scale;
+        next.Val *= other.Val;
+        next.Len *= other.Len;
         return next;
     }
 }

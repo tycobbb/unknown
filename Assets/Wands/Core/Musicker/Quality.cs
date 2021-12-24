@@ -35,6 +35,14 @@ public readonly struct Quality {
         Tone.III.Flat()
     );
 
+    /// a major fifth (w/ octave)
+    public static Quality Maj5 = new Quality(
+        Tone.I,
+        Tone.III,
+        Tone.V,
+        Tone.I.Octave()
+    );
+
     /// a major 7th chord quality
     public static Quality Maj7 = new Quality(
         Tone.I,

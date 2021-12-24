@@ -13,18 +13,11 @@ public class Player: MonoBehaviour {
 
     // -- tuning --
     [Header("tuning")]
-    [UnityEngine.Serialization.FormerlySerializedAs("m_Hitbox")]
     [Tooltip("the hitbox at the player's hand")]
     [SerializeField] HitBox m_HandHitBox;
 
     [Tooltip("the hitbox at the player's foot")]
     [SerializeField] HitBox m_FootHitBox;
-
-    [Tooltip("the scale of the hand on hit")]
-    [SerializeField] Linear<float> m_HitHandScale;
-
-    [Tooltip("the hitstop duration curve")]
-    [SerializeField] AnimationCurve m_HitStopDuration;
 
     // -- components --
     [Header("components")]
@@ -131,7 +124,7 @@ public class Player: MonoBehaviour {
         Read();
 
         // apply movement
-        Move();
+        Play();
 
         // m_Line.Thickness = Mathf.LerpUnclamped(2.0f, 0.5f, (m_Line.End - m_Line.Start).magnitude);
     }
@@ -191,7 +184,7 @@ public class Player: MonoBehaviour {
     }
 
     /// move line into position
-    void Move() {
+    void Play() {
         // if not in hitstop
         if (m_HitStop.IsActive) {
             return;
@@ -226,16 +219,16 @@ public class Player: MonoBehaviour {
         var p0 = m_Move.Pos;
         var p1 = m_Flick.Pos;
 
-        // get hand to foot dist
-        var dist = p1 - p0;
+        // get hand-to-foot displacement
+        var dsp = p1 - p0;
 
         // given the max and actual length
         var max = m_Length;
-        var len = Vec2.Magnitude(dist);
+        var len = Vec2.Magnitude(dsp);
 
         // pull the hand into place
         if (max < len) {
-            m_Flick.Pos = p0 + dist.normalized * max;
+            m_Flick.Pos = p0 + dsp.normalized * max;
         }
     }
 
@@ -278,9 +271,8 @@ public class Player: MonoBehaviour {
         m_Flick.Cancel();
 
         // play hitstop
-        var dur = m_HitStopDuration.Evaluate(speed);
-        p.m_HitStop.Play(dur, source: p);
-        o.m_HitStop.Play(dur, source: o);
+        p.m_HitStop.Play(speed, source: p);
+        o.m_HitStop.Play(speed, source: o);
 
         // play hit effects
         m_HitRing.Play(new HitRingEvent(m_Config, m_HandHitBox));

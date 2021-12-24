@@ -34,6 +34,12 @@ public class Game: MonoBehaviour {
     bool m_IsScreenshot;
 
     // -- lifecycle --
+    void Start() {
+        var prefab = GetComponent<PlayerInputManager>().playerPrefab;
+        Instantiate(prefab);
+        Instantiate(prefab);
+    }
+
     void FixedUpdate() {
         // read input
         ReadHotkeys();

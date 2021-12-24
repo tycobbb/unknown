@@ -108,7 +108,7 @@ public class PlayerMove: MonoBehaviour {
             );
 
             var _ = accel
-                .TweenTo(1.0f, 0.0f, m_DashAccel.Duration())
+                .Tween(1.0f, 0.0f, m_DashAccel.Duration())
                 .SetEase(m_DashAccel);
         }
     }

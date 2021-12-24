@@ -17,10 +17,10 @@ public sealed class HitScale: MonoBehaviour, IEffect<Nothing> {
 
     // -- commands --
     /// play the hit effect
-    public void Play(Nothing _ = default) {
+    public void Play(Nothing _n = default) {
         // get start and end radius
         var r0 = m_Hand.Radius;
-        var r1 = m_Scale.Mul(r0, 0.5f);
+        var r1 = m_Scale.Mul(new Linear<float>(r0, 0.5f));
 
         // get lens
         var radius = new Lens<float>(
@@ -29,8 +29,8 @@ public sealed class HitScale: MonoBehaviour, IEffect<Nothing> {
         );
 
         // create tween
-        radius
-            .TweenTo(r0, r1)
+        var _ = radius
+            .Tween(r0, r1)
             .SetLoops(2, LoopType.Yoyo)
             .SetEase(Ease.InOutCubic);
     }

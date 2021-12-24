@@ -10,6 +10,11 @@ public readonly struct Tone {
         m_Steps = steps;
     }
 
+    /// create a new tone w/ an interval
+    public Tone(Interval interval) {
+        m_Steps = (int)interval;
+    }
+
     // -- operators --
     /// makes the tone n steps sharper
     public Tone Add(int nSteps = 1) {

@@ -35,6 +35,11 @@ namespace Colors {
             return new Hsv(H * h, S * s, V * v);
         }
 
+        /// set the hue
+        public Hsv Hue(float h) {
+            return new Hsv(h, S, V);
+        }
+
         // -- queries --
         /// get rgb color from hsv
         public Color ToRgb(float a = 1.0f) {
