@@ -2,8 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+namespace Musicker {
+
 /// a thing that plays music
-public sealed class Musicker: MonoBehaviour {
+public sealed class MusicSource: MonoBehaviour {
     // -- tuning --
     [Header("tuning")]
     [Tooltip("the max volume")]
@@ -312,4 +314,6 @@ public sealed class Musicker: MonoBehaviour {
             (v) => m_VolumeBySource[i] = Mathf.Min(v, m_MaxVolume)
         );
     }
+}
+
 }

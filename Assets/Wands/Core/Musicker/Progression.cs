@@ -1,3 +1,5 @@
+namespace Musicker {
+
 /// a chord progression
 public sealed class Progression {
     // -- props --
@@ -26,4 +28,6 @@ public sealed class Progression {
     public Chord Curr() {
         return m_Chords[m_Curr];
     }
+}
+
 }

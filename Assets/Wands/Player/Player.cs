@@ -1,5 +1,4 @@
-using System.Collections;
-using DG.Tweening;
+using Musicker;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -56,10 +55,10 @@ public class Player: MonoBehaviour {
     [SerializeField] Shapes.Disc m_Ghost;
 
     [Tooltip("plays voice music")]
-    [SerializeField] Musicker m_Voice;
+    [SerializeField] MusicSource m_Voice;
 
     [Tooltip("plays footstep music")]
-    [SerializeField] Musicker m_Steps;
+    [SerializeField] MusicSource m_Steps;
 
     [Tooltip("the input system input")]
     [SerializeField] PlayerInput m_Input;
@@ -72,7 +71,7 @@ public class Player: MonoBehaviour {
     float m_Length = 0.5f;
 
     /// the musical key
-    Key m_Key;
+    Musicker.Key m_Key;
 
     /// a line as the player's anchor changes
     Line m_VoiceLine;
@@ -143,7 +142,7 @@ public class Player: MonoBehaviour {
         var cfg = m_Config;
 
         // apply config
-        m_Key = new Key(cfg.Key);
+        m_Key = new Musicker.Key(cfg.Key);
 
         // decompose color
         var rgb = cfg.Color;

@@ -1,5 +1,7 @@
 using UnityEngine;
 
+namespace Musicker {
+
 /// produces any note in the chromatic scale
 public class Instrument: MonoBehaviour {
     // -- config --
@@ -27,4 +29,6 @@ public class Instrument: MonoBehaviour {
     int Length {
         get => m_Scale.Length;
     }
+}
+
 }

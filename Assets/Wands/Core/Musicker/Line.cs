@@ -1,3 +1,5 @@
+namespace Musicker {
+
 /// a note progression
 public sealed class Line {
     // -- props --
@@ -36,4 +38,6 @@ public sealed class Line {
     public Tone this[int i] {
         get => m_Tones[i];
     }
+}
+
 }

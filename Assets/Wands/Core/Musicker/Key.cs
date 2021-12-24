@@ -1,3 +1,5 @@
+namespace Musicker {
+
 /// a western-musical key
 public readonly struct Key {
     // -- props --
@@ -19,4 +21,6 @@ public readonly struct Key {
     public Tone Transpose(Tone tone) {
         return tone.Transpose(m_Root);
     }
+}
+
 }

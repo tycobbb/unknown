@@ -1,3 +1,5 @@
+namespace Musicker {
+
 /// a western-musical tone
 public readonly struct Tone {
     // -- props --
@@ -75,4 +77,6 @@ public readonly struct Tone {
     public static Tone VII {
         get => new Tone(11);
     }
+}
+
 }

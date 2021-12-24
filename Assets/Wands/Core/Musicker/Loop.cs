@@ -1,3 +1,5 @@
+namespace Musicker {
+
 /// a loop
 public sealed class Loop {
     // -- props --
@@ -48,4 +50,6 @@ public sealed class Loop {
     public float Blend {
         get => m_Blend;
     }
+}
+
 }

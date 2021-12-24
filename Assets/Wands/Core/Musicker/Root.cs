@@ -1,3 +1,5 @@
+namespace Musicker {
+
 /// the root of a key
 public enum Root {
     C = 0,
@@ -17,4 +19,6 @@ public enum Root {
     A_s = 10,
     B_f = 10,
     B = 11,
+}
+
 }

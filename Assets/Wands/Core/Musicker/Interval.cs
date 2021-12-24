@@ -1,3 +1,5 @@
+namespace Musicker {
+
 /// a named interval
 public enum Interval {
     I = 0,
@@ -17,4 +19,6 @@ public enum Interval {
     VI_s = 10,
     VII_f = 10,
     VII = 11,
+}
+
 }

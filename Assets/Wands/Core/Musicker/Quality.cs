@@ -1,3 +1,5 @@
+namespace Musicker {
+
 /// a chord quality
 public readonly struct Quality {
     // -- props --
@@ -82,4 +84,6 @@ public readonly struct Quality {
         Tone.V.Flat(),
         Tone.VII.Flat(2)
     );
+}
+
 }

@@ -1,5 +1,7 @@
 using System.Linq;
 
+namespace Musicker {
+
 /// a chord w/ a key and quality
 public readonly struct Chord {
     // -- props --
@@ -43,4 +45,6 @@ public readonly struct Chord {
     public override string ToString() {
         return string.Join(" ", m_Tones.Select((n) => n.ToString()));
     }
+}
+
 }
