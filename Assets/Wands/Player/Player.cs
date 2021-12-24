@@ -179,6 +179,12 @@ public class Player: MonoBehaviour {
 
     /// read input
     void Read() {
+        // if not in hitstop
+        if (m_HitStop.IsActive) {
+            return;
+        }
+
+        // read input
         m_Move.Read();
         m_Flick.Read();
     }
